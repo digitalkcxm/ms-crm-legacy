@@ -3,7 +3,7 @@ const helmet = require('helmet')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 
-const customerRouter = require('../src/routes/customer-router')
+const customerRouter = require('../routes/customer-router')
 
 const app = express()
 

@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "./node_modules/.bin/run.env nodemon index.js",
-    "migrate:latest": "./node_modules/.bin/run.env ./node_modules/.bin/sequelize db:migrate"
+    "migrate:latest": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
+    "seed:run": "./node_modules/.bin/run.env ./node_modules/.bin/knex seed:run",
+    "migrate:rollback": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback"
   },
   "author": "Silas Silva <silas.silva@digitalk.com.br>",
   "license": "ISC",
@@ -16,9 +18,8 @@
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "helmet": "^3.20.0",
+    "knex": "^0.19.1",
     "pg": "^7.12.0",
-    "run.env": "^1.1.0",
-    "sequelize": "^5.10.3",
-    "sequelize-cli": "^5.5.0"
+    "run.env": "^1.1.0"
   }
 }
