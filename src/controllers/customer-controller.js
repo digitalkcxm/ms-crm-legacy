@@ -17,7 +17,7 @@ class CustomerController {
   async createBatch(req, res) {
     const customers = req.body.customers
 
-    const companyToken = req.headers['company_token']
+    const companyToken = req.headers['token']
 
     if (companyToken.length === 0) return res.status(500).send({ err: "Company Token inválido." })
 
@@ -27,7 +27,7 @@ class CustomerController {
   }
 
   async getByCpfCnpj (req, res) {
-    const companyToken = req.headers['company_token']
+    const companyToken = req.headers['token']
 
     try {
       var customer = await newCustomer.getByCpfCnpj(req.query.cpfcnpj, companyToken)
@@ -45,7 +45,7 @@ class CustomerController {
   }
 
   async update (req, res) {
-    const companyToken = req.headers['company_token']
+    const companyToken = req.headers['token']
 
     try {
       const customer = await newCustomer.getById(req.params.id, companyToken)

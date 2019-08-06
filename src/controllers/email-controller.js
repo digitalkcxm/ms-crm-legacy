@@ -8,7 +8,7 @@ class EmailController {
   async create (req, res) {
     req.assert('email', 'E-mail é obrigatório').notEmpty()
 
-    const companyToken = req.headers['company_token']
+    const companyToken = req.headers['token']
 
     if (req.validationErrors()) return res.status(400).send({ errors: req.validationErrors() })
 
