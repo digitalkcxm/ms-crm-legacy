@@ -1,0 +1,30 @@
+Lista de campos para cadastrar CUSTOMER
+- customer_name
+- customer_cpfcnpj
+- customer_cpfcnpj_status
+- customer_birthdate
+- customer_gender
+- customer_mother_name
+- customer_deceased (falecido?)
+- customer_occupation
+- customer_income
+- customer_credit_risk
+- customer_address_street
+- customer_address_city
+- customer_address_cep
+- customer_address_state
+- customer_address_district
+- customer_address_type
+- customer_email
+- customer_phone_number
+- customer_phone_type
+- customer_vehicle_plate
+- customer_vehicle_model
+- customer_vehicle_year
+- customer_vehicle_renavam
+- customer_vehicle_chassi
+- customer_vehicle_license
+- customer_business_partner_cnpj
+- customer_business_partner_fantasy_name
+- customer_business_partner_status
+- customer_business_partner_foundation_date
