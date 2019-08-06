@@ -26,6 +26,17 @@ class Email {
       return err
     }
   }
+
+  async getAllByCustomer(customerId) {
+    try {
+      const emails = await database('email')
+        .select(['id', 'email', 'created_at', 'updated_at'])
+        .where({ id_customer: customerId })
+      return emails
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = Email

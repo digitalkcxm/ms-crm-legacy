@@ -47,6 +47,17 @@ class Vehicle {
       return err
     }
   }
+
+  async getAllByCustomer (customerId) {
+    try {
+      const vehicles = await database('vehicle')
+        .select(['id', 'plate', 'model', 'year', 'renavam', 'chassi', 'license', 'created_at', 'updated_at'])
+        .where({ id_customer: customerId })
+      return vehicles
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = Vehicle

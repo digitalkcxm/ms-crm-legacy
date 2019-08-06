@@ -47,6 +47,17 @@ class Address {
       return err
     }
   }
+
+  async getAllByCustomer (customerId) {
+    try {
+      const addressess = await database('address')
+        .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type', 'created_at', 'updated_at'])
+        .where({ id_customer: customerId })
+      return addressess
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = Address

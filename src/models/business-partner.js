@@ -47,6 +47,17 @@ class BusinessPartner {
       return err
     }
   }
+
+  async getAllByCustomer (customerId) {
+    try {
+      const businessPartnerList = await database('business_partner')
+        .select(['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
+        .where({ id_customer: customerId })
+      return businessPartnerList
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = BusinessPartner

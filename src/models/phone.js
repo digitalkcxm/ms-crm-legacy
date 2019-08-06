@@ -47,6 +47,17 @@ class Phone {
       return err
     }
   }
+
+  async getAllByCustomer (customerId) {
+    try {
+      const phones = await database('phone')
+        .select(['id', 'number', 'type', 'created_at', 'updated_at'])
+        .where({ id_customer: customerId })
+      return phones
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = Phone
