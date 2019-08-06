@@ -17,10 +17,10 @@
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "express-validator": "^5.3.1",
     "helmet": "^3.20.0",
     "knex": "^0.19.1",
     "pg": "^7.12.0",
-    "express-validator": "^5.3.1",
     "run.env": "^1.1.0"
   }
 }
