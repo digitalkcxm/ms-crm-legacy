@@ -53,7 +53,7 @@ class Customer {
       const customer = await database('customer')
         .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'created_at', 'updated_at'])
         .where({ cpfcnpj, company_token })
-      if (customer) return customer[0]
+      if (customer && customer.length > 0) return customer[0]
       return null
     } catch (err) {
       return err
