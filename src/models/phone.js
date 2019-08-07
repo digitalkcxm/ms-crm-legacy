@@ -2,6 +2,7 @@ const database = require('../config/database/database')
 
 class Phone {
   async createOrUpdate (customerId, newPhone) {
+    console.log(customerId)
     try {
       const phone = await this.getByNumber(customerId, newPhone.number)
       if (phone) {
@@ -28,7 +29,7 @@ class Phone {
   async update (customerId, phoneId, phone) {
     try {
       await database('phone')
-        .update({ type: phone.type }, 'id')
+        .update({ type: phone.type, number: phone.number }, 'id')
         .where({ id_customer: customerId, id: phoneId })
       return phoneId
     } catch (err) {

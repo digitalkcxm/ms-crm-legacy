@@ -6,6 +6,7 @@ const expressValidator = require('express-validator')
 
 const customerRouter = require('../routes/customer-router')
 const emailRouter = require('../routes/email-router')
+const phoneRouter = require('../routes/phone-router')
 
 const app = express()
 
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ limit: '250mb', extended: true }))
 
 customerRouter(app)
 emailRouter(app)
+phoneRouter(app)
 
 const port = process.env.PORT || 4000
 app.listen(port, () => {
