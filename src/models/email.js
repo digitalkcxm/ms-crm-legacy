@@ -15,6 +15,17 @@ class Email {
     }
   }
 
+  async update (customerId, emailId, email) {
+    try {
+      const result = await database('email')
+        .update({ email }, ['id', 'email', 'created_at', 'updated_at'])
+        .where({ id: emailId, id_customer: customerId })
+      return result[0]
+    } catch (err) {
+      return err
+    }
+  }
+
   async getByEmail(customerId, email) {
     try {
       const customerEmail = await database('email')
