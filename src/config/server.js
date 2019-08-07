@@ -4,9 +4,10 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const expressValidator = require('express-validator')
 
-const customerRouter = require('../routes/customer-router')
-const emailRouter = require('../routes/email-router')
-const phoneRouter = require('../routes/phone-router')
+const customerRoutes = require('../routes/customer-router')
+const emailRoutes = require('../routes/email-router')
+const phoneRoutes = require('../routes/phone-router')
+const vehicleRoutes = require('../routes/vehicle-router')
 
 const app = express()
 
@@ -16,9 +17,10 @@ app.use(expressValidator())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ limit: '250mb', extended: true }))
 
-customerRouter(app)
-emailRouter(app)
-phoneRouter(app)
+customerRoutes(app)
+emailRoutes(app)
+phoneRoutes(app)
+vehicleRoutes(app)
 
 const port = process.env.PORT || 4000
 app.listen(port, () => {
