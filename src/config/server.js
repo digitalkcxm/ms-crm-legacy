@@ -9,6 +9,7 @@ const emailRoutes = require('../routes/email-router')
 const phoneRoutes = require('../routes/phone-router')
 const vehicleRoutes = require('../routes/vehicle-router')
 const addressRoutes = require('../routes/address-router')
+const businessPartnerRoutes = require('../routes/business-partner-router')
 
 const app = express()
 
@@ -23,6 +24,7 @@ emailRoutes(app)
 phoneRoutes(app)
 vehicleRoutes(app)
 addressRoutes(app)
+businessPartnerRoutes(app)
 
 const port = process.env.PORT || 4000
 app.listen(port, () => {
