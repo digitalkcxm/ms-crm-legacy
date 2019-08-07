@@ -23,25 +23,25 @@ async function schedulePersist(dataCustomers, companyToken) {
 async function persistCustomer(dataCustomer) {
   try {
     const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer)
-    if (dataCustomer.email.length > 0) {
-      const emailId = await newEmail.create(customerId, dataCustomer.email[0].email)
-    }
+    dataCustomer.email.forEach(email => {
+      await newEmail.create(customerId, email.email)
+    })
+    
+    dataCustomer.phone.forEach(phone => {
+      await newPhone.createOrUpdate(customerId, phone)
+    })
+    
+    dataCustomer.address.forEach(address => {
+      await newAddress.createOrUpdate(customerId, address)
+    })
 
-    if (dataCustomer.phone.length > 0) {
-      const phoneId = await newPhone.createOrUpdate(customerId, dataCustomer.phone[0])
-    }
+    dataCustomer.vehicle.forEach(vehicle => {
+      await newVehicle.createOrUpdate(customerId, vehicle)
+    })
 
-    if (dataCustomer.address.length > 0) {
-      const addressId = await newAddress.createOrUpdate(customerId, dataCustomer.address[0])
-    }
-
-    if (dataCustomer.vehicle.length > 0) {
-      const vehicleId = await newVehicle.createOrUpdate(customerId, dataCustomer.vehicle[0])
-    }
-
-    if (dataCustomer.business_partner.length > 0) {
-      const businessPartnerId = await newBusinessPartner.createOrUpdate(customerId, dataCustomer.business_partner[0])
-    }
+    dataCustomer.business_partner.forEach(businessPartner => {
+      await newBusinessPartner.createOrUpdate(customerId, businessPartner)
+    })
   } catch (err) {
     return err
   }
