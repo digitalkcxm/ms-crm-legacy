@@ -30,15 +30,19 @@ class CustomerController {
 
   async create(req, res) {
     req.assert('customer_cpfcnpj', 'O CPF/CNPJ é obrigatório').notEmpty()
+    
+    if (req.validationErrors()) return res.status(500).send({ errors: req.validationErrors() })
+
     const companyToken = req.headers['token']
 
     if (companyToken.length === 0) return res.status(500).send({ err: "Company Token inválido." })
 
-    var customer = await newCustomer.getByCpfCnpj(req.body.customer_cpfcnpj, companyToken)
-    if (customer) return res.status(400).send({ err: "Já existe um cadastro com este CPF/CNPJ." })
-    
     try {
+      var customer = await newCustomer.getByCpfCnpj(req.body.customer_cpfcnpj, companyToken)
+      if (customer) return res.status(400).send({ err: "Já existe um cadastro com este CPF/CNPJ." })
+
       const customers = [req.body]
+      
       await customerService.schedulePersist(customers, companyToken, [], [])
 
       res.status(201).send(req.body)
