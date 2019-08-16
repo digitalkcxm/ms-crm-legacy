@@ -13,16 +13,16 @@ const newAddress = new Address()
 const newVehicle = new Vehicle()
 const newBusinessPartner = new BusinessPartner()
 
-async function schedulePersist(dataCustomers, companyToken) {
+async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId) {
 
   const customers = dataCustomers.map((data) => builderCustomer.buildCustomer(data, companyToken))
 
-  return await Promise.all(customers.map((customer) => persistCustomer(customer)))
+  return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId)))
 }
 
-async function persistCustomer(dataCustomer) {
+async function persistCustomer(dataCustomer, businessId, businessTemplateId) {
   try {
-    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer)
+    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer, businessId, businessTemplateId)
     await dataCustomer.email.forEach(async (email) => {
       await newEmail.create(customerId, email.email)
     })
