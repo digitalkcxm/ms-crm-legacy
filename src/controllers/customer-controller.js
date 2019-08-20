@@ -5,6 +5,7 @@ const Phone = require('../models/phone')
 const Address = require('../models/address')
 const BusinessPartner = require('../models/business-partner')
 const Vehicle = require('../models/vehicle')
+const { searchCustomer } = require('../helpers/elastic')
 
 const newCustomer = new Customer()
 const newEmail = new Email()
@@ -46,6 +47,19 @@ class CustomerController {
       await customerService.schedulePersist(customers, companyToken, [], [])
 
       res.status(201).send(req.body)
+    } catch (err) {
+      return res.status(500).send({ err: err.message })
+    }
+  }
+
+  async search (req, res) {
+    const companyToken = req.headers['token']
+
+    try {
+      const result = await searchCustomer(req.query.search)
+      var customers = []
+      if (result && result.length > 0) customers = result.map(r => r._source.doc)
+      return res.status(200).send(customers)
     } catch (err) {
       return res.status(500).send({ err: err.message })
     }
