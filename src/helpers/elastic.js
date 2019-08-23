@@ -7,7 +7,6 @@ async function updateCustomer (obj, index) {
   let newDate = moment(new Date()).format('YYYYMM')
   try {
     const result = await axios.post(`${host}/${index}-crm-${newDate}/customer/${obj.id}`, { doc: obj, upsert: obj })
-    console.log('elastic', 'aaaa')
     if (result)
       return result
   } catch (err) {

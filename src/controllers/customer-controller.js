@@ -57,8 +57,7 @@ class CustomerController {
 
   async search (req, res) {
     const companyToken = req.headers['token']
-    const prefixIndexElastic = req.headers['prefix_index_elastic']
-
+    const prefixIndexElastic = req.headers['prefix-index-elastic']
     try {
       const result = await searchCustomer(req.query.search, prefixIndexElastic)
       var customers = []
