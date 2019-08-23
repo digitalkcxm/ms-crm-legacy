@@ -14,23 +14,39 @@ const newAddress = new Address()
 const newVehicle = new Vehicle()
 const newBusinessPartner = new BusinessPartner()
 
-async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId) {
+async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
 
-  const customers = dataCustomers.map((data) => builderCustomer.buildCustomer(data, companyToken))
+  var customers = []
+  dataCustomers.forEach((data) => {
+    var customer = builderCustomer.buildCustomer(data, companyToken)
+    customers.push(customer)
+  })
 
-  return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId)))
+  return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
 }
 
-async function persistCustomer(dataCustomer, businessId, businessTemplateId) {
+function translateFields (fields) {
+  return fields.map(f => {
+    if (f == 'customer_cpfcnpj') return 'cpfcnpj'
+    if (f == 'customer_name') return 'name'
+  })
+}
+
+async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
+  var dataKeyFields = []
+  listKeyFields.forEach(f => {
+    dataKeyFields[f] = dataCustomer.customer[f]
+  })
+  
   try {
-    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer, businessId, businessTemplateId)
+    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
     await updateCustomer({
       id: customerId,
       customer_cpfcnpj:
       dataCustomer.customer.cpfcnpj,
       customer_name: dataCustomer.customer.name,
       customer_phome: dataCustomer.phone,
-      customer_email: dataCustomer.email })
+      customer_email: dataCustomer.email }, prefixIndexElastic)
     await dataCustomer.email.forEach(async (email) => {
       await newEmail.create(customerId, email.email)
     })

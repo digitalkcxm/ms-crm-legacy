@@ -1,9 +1,11 @@
 const database = require('../config/database/database')
 
 class Customer {
-  async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId) {
+  async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId, dataKeyFields) {
     try {
-      const customer = await this.getByCpfCnpj(cpfcnpj, companyToken)
+      const customer = await this.getCustomerByKeyFields(dataKeyFields, companyToken)
+      console.log('params', dataKeyFields)
+      console.log('customer', customer)
       if (customer) {
         var business_list = customer.business_list
         var business_template_list = customer.business_template_list
@@ -37,10 +39,24 @@ class Customer {
     }
   }
 
+  async getCustomerByKeyFields (dataKeyFields, companyToken) {
+    try {
+      var params = dataKeyFields
+      params.company_token = companyToken
+      const customer = await database('customer')
+        .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'created_at', 'updated_at'])
+        .where(params)
+      if (customer) return customer[0]
+      return null
+    } catch (err) {
+      return err
+    }
+  }
+
   async getById (id, company_token) {
     try {
       const customer = await database('customer')
-        .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'created_at', 'updated_at'])
+        .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'business_list', 'business_template_list', 'created_at', 'updated_at'])
         .where({ id, company_token })
       if (customer) return customer[0]
       return null

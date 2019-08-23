@@ -19,18 +19,21 @@ class CustomerController {
     const customers = req.body.customers
     const businessId  = req.body.business_id
     const businessTemplateId = req.body.business_template_id
+    const listKeyFields = req.body.field_key_list
+    const prefixIndexElastic = req.body.prefix_index_elastic
 
     const companyToken = req.headers['token']
 
     if (companyToken.length === 0) return res.status(500).send({ err: "Company Token inválido." })
 
-    await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId])
+    await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId], listKeyFields, prefixIndexElastic)
 
     res.status(201).send(req.body)
   }
 
   async create(req, res) {
     req.assert('customer_cpfcnpj', 'O CPF/CNPJ é obrigatório').notEmpty()
+    req.assert('prefix_index_elastic', 'O prefix index elastic é obrigatório').notEmpty()
     
     if (req.validationErrors()) return res.status(500).send({ errors: req.validationErrors() })
 
@@ -44,7 +47,7 @@ class CustomerController {
 
       const customers = [req.body]
       
-      await customerService.schedulePersist(customers, companyToken, [], [])
+      await customerService.schedulePersist(customers, companyToken, [], [], ['customer_cpfcnpj'], req.body.prefixIndexElastic)
 
       res.status(201).send(req.body)
     } catch (err) {
@@ -54,9 +57,10 @@ class CustomerController {
 
   async search (req, res) {
     const companyToken = req.headers['token']
+    const prefixIndexElastic = req.headers['prefix_index_elastic']
 
     try {
-      const result = await searchCustomer(req.query.search)
+      const result = await searchCustomer(req.query.search, prefixIndexElastic)
       var customers = []
       if (result && result.length > 0) customers = result.map(r => r._source.doc)
       return res.status(200).send(customers)
