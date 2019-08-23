@@ -24,7 +24,13 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
 async function persistCustomer(dataCustomer, businessId, businessTemplateId) {
   try {
     const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer, businessId, businessTemplateId)
-    await updateCustomer({ customer_cpfcnpj: dataCustomer.customer.cpfcnpj, customer_name: dataCustomer.customer.name })
+    await updateCustomer({
+      id: customerId,
+      customer_cpfcnpj:
+      dataCustomer.customer.cpfcnpj,
+      customer_name: dataCustomer.customer.name,
+      customer_phome: dataCustomer.phone,
+      customer_email: dataCustomer.email })
     await dataCustomer.email.forEach(async (email) => {
       await newEmail.create(customerId, email.email)
     })

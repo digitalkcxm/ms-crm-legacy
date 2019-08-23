@@ -65,6 +65,24 @@ class CustomerController {
     }
   }
 
+  async getById (req, res) {
+    const companyToken = req.headers['token']
+
+    try {
+      var customer = await newCustomer.getById(req.params.id, companyToken)
+      if (customer) {
+        customer.email = await newEmail.getAllByCustomer(customer.id)
+        customer.address = await newAddress.getAllByCustomer(customer.id)
+        customer.phone = await newPhone.getAllByCustomer(customer.id)
+        customer.business_partner = await newBusinessPartner.getAllByCustomer(customer.id)
+        customer.vehicle = await newVehicle.getAllByCustomer(customer.id)
+      }
+      return res.status(200).send(customer)
+    } catch (err) {
+      return res.status(500).send({ err: err.message })
+    }
+  }
+
   async getByCpfCnpj (req, res) {
     const companyToken = req.headers['token']
 

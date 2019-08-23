@@ -8,5 +8,6 @@ module.exports = (app) => {
   app.get('/api/v1/customers', (req, res) => customerController.getByCpfCnpj(req, res)),
   app.get('/api/v1/customers/search', (req, res) => customerController.search(req, res)),
   app.get('/api/v1/customers/all', (req, res) => customerController.getAllByCompany(req, res)),
+  app.get('/api/v1/customers/:id', (req, res) => customerController.getById(req, res))
   app.put('/api/v1/customers/:id', (req, res) => customerController.update(req, res))
 }
