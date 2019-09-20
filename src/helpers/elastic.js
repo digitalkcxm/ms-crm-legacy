@@ -10,7 +10,6 @@ async function updateCustomer (obj, index) {
     if (result)
       return result
   } catch (err) {
-    console.error(err)
     return true
   }
 }
