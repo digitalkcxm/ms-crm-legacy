@@ -62,6 +62,15 @@ class CustomerController {
       const result = await searchCustomer(req.query.search, prefixIndexElastic)
       var customers = []
       if (result && result.length > 0) customers = result.map(r => r._source.doc)
+      var customers_ids = customers.map(c => c.id)
+      var list_customers = await newCustomer.listById(customers_ids, companyToken)
+      customers.forEach(c => {
+	var customer1 = list_customers.find(cus => cus.id == c.id)
+        if (customer1) {
+          c.business_list = customer1.business_list
+          c.business_template_list = customer1.business_template_list
+        }
+      })
       return res.status(200).send(customers)
     } catch (err) {
       return res.status(500).send({ err: err.message })

@@ -53,6 +53,15 @@ class Customer {
     }
   }
 
+  async listById (list_id, company_token) {
+    try {
+       const customers = await database('customer').select(['id', 'business_list', 'business_template_list']).whereIn('id', list_id).where({ company_token })
+       return customers
+    } catch(err) {
+      return err
+    }
+  }
+
   async getById (id, company_token) {
     try {
       const customer = await database('customer')
