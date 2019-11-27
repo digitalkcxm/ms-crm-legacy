@@ -7,13 +7,38 @@ function buildCustomer (data, companyToken) {
 
   if (data.customer_name) dataCustomer.customer.name = data.customer_name
   if (data.customer_cpfcnpj_status) dataCustomer.customer.cpfcnpj_status = data.customer_cpfcnpj_status
-  if (data.customer_birthdate) dataCustomer.customer.birthdate = data.customer_birthdate
   if (data.customer_gender) dataCustomer.customer.gender = data.customer_gender
   if (data.customer_mother_name) dataCustomer.customer.mother_name = data.customer_mother_name
-  if (data.customer_deceased) dataCustomer.customer.deceased = data.customer_deceased
+  
   if (data.customer_occupation) dataCustomer.customer.occupation = data.customer_occupation
-  if (data.customer_income) dataCustomer.customer.income = data.customer_income
+
+  if (data.customer_deceased) {
+    if (data.customer_deceased.toUpperCase().indexOf("N") === 0) {
+      dataCustomer.customer.deceased = false
+    } else {
+      dataCustomer.customer.deceased = true
+    }
+  }
+  
   if (data.customer_credit_risk) dataCustomer.customer.credit_risk = data.customer_credit_risk
+
+  if (data.customer_birthdate) {
+    if (data.customer_birthdate.indexOf("/") > 0) {
+      let arrDate = data.customer_birthdate.split("/")
+      let strData = `${arrDate[2]}-${arrDate[1]}-${arrDate[0]}`
+      dataCustomer.customer.birthdate = strData
+    } else {
+      dataCustomer.customer.birthdate = data.customer_birthdate
+    }
+  }
+
+  if (data.customer_income) {
+    if (isNaN(data.customer_income)) {
+      dataCustomer.customer.income = 0
+    } else {
+      dataCustomer.customer.income = data.customer_income
+    }
+  }
 
   var address = []
   if (data.customer_address && Array.isArray(data.customer_address)) {
@@ -31,7 +56,6 @@ function buildCustomer (data, companyToken) {
   }
   dataCustomer.address = address
   
-
   var email = []
   if (data.customer_email && Array.isArray(data.customer_email)) {
     data.customer_email.forEach(e => {
