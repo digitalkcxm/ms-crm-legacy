@@ -62,7 +62,8 @@ class CustomerController {
       const result = await searchCustomer(req.query.search, prefixIndexElastic)
       var customers = []
       if (result && result.length > 0) customers = result.map(r => r._source.doc)
-      var customers_ids = customers.map(c => c.id)
+      var customers_ids = customers.map(c => c.id).filter((value, index, self) => self.indexOf(value) === index)
+console.log(customers_ids)
       var list_customers = await newCustomer.listById(customers_ids, companyToken)
       customers.forEach(c => {
 	var customer1 = list_customers.find(cus => cus.id == c.id)
