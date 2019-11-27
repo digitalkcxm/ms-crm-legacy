@@ -16,8 +16,9 @@ async function updateCustomer (obj, index) {
 
 async function searchCustomer (search, index) {
   try {
-    const result = await axios.get(`${host}/${index}-crm-*/_search?q=${search}`)
-    return result.data.hits.hits
+    const result = await axios.get(`${host}/${index}-crm-*/_search?q=*${search}*`)
+    const data = result.data.hits.hits
+    return data
   } catch (err) {
     return err
   }

@@ -62,12 +62,11 @@ class CustomerController {
       const result = await searchCustomer(req.query.search, prefixIndexElastic)
       var customers = []
       if (result && result.length > 0) customers = result.map(r => r._source.doc)
-      customers.push(customers[0])
+      if (customers.length > 0) customers.push(customers[0])
+
       var customers_ids = customers.map(c => c.id).filter((value, index, self) => self.indexOf(value) === index)
-      
       var list_customers = await newCustomer.listById(customers_ids, companyToken)
       var customersResult = []
-
       customers_ids.forEach(cid => {
         var customerCache = customers.find(c => c.id == cid)
         var customer1 = list_customers.find(cus => cus.id == cid)
@@ -81,6 +80,7 @@ class CustomerController {
 
       return res.status(200).send(customersResult)
     } catch (err) {
+console.error(err)
       return res.status(500).send({ err: err.message })
     }
   }
