@@ -10,4 +10,5 @@ module.exports = (app) => {
   app.get('/api/v1/customers/all', (req, res) => customerController.getAllByCompany(req, res)),
   app.get('/api/v1/customers/:id', (req, res) => customerController.getById(req, res))
   app.put('/api/v1/customers/:id', (req, res) => customerController.update(req, res))
+  app.get('/api/v1/customers/:id/formatted', (req, res) => customerController.getByIdFormatted(req, res))
 }

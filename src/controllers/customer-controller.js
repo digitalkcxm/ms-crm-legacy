@@ -6,6 +6,7 @@ const Address = require('../models/address')
 const BusinessPartner = require('../models/business-partner')
 const Vehicle = require('../models/vehicle')
 const { searchCustomer } = require('../helpers/elastic')
+const { buildCustomerDTO } = require('../lib/builder-customer-dto')
 
 const newCustomer = new Customer()
 const newEmail = new Email()
@@ -80,7 +81,7 @@ class CustomerController {
 
       return res.status(200).send(customersResult)
     } catch (err) {
-console.error(err)
+      console.error(err)
       return res.status(500).send({ err: err.message })
     }
   }
@@ -97,6 +98,27 @@ console.error(err)
         customer.business_partner = await newBusinessPartner.getAllByCustomer(customer.id)
         customer.vehicle = await newVehicle.getAllByCustomer(customer.id)
       }
+      return res.status(200).send(customer)
+    } catch (err) {
+      return res.status(500).send({ err: err.message })
+    }
+  }
+
+  async getByIdFormatted (req, res) {
+    const companyToken = req.headers['token']
+
+    try {
+      var customer = await newCustomer.getById(req.params.id, companyToken)
+      if (customer) {
+        customer.email = await newEmail.getAllByCustomer(customer.id)
+        customer.address = await newAddress.getAllByCustomer(customer.id)
+        customer.phone = await newPhone.getAllByCustomer(customer.id)
+        customer.business_partner = await newBusinessPartner.getAllByCustomer(customer.id)
+        customer.vehicle = await newVehicle.getAllByCustomer(customer.id)
+      }
+
+      customer = buildCustomerDTO(customer)
+
       return res.status(200).send(customer)
     } catch (err) {
       return res.status(500).send({ err: err.message })
