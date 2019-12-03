@@ -64,8 +64,8 @@ function buildCustomerDTO (customer) {
       listPhone.forEach(p => {
         let phone = {
           id: p.id,
-          number: p.number,
-          type: p.type
+          customer_phone_number: p.number,
+          customer_phone_type: p.type
         }
         listPhoneFormatted.push(phone)
       })
