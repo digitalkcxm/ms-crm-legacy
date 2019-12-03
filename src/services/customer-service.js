@@ -67,6 +67,7 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
       await newBusinessPartner.createOrUpdate(customerId, businessPartner)
     })
   } catch (err) {
+console.error(err)
     return err
   }
 }
