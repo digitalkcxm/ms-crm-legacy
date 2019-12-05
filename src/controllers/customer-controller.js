@@ -24,12 +24,17 @@ class CustomerController {
     const prefixIndexElastic = req.body.prefix_index_elastic
 
     const companyToken = req.headers['token']
-
+    
     if (companyToken.length === 0) return res.status(500).send({ err: "Company Token inválido." })
 
-    await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId], listKeyFields, prefixIndexElastic)
+    try {
+      await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId], listKeyFields, prefixIndexElastic)
 
-    res.status(201).send(req.body)
+      res.status(201).send(req.body)
+    } catch (err) {
+      console.error('CREATE BATCH CUSTOMER ==>', err)
+      return res.status(500).send({ error: 'Erro ao salvar os dados do customer' })
+    }
   }
 
   async create(req, res) {
@@ -52,7 +57,8 @@ class CustomerController {
 
       res.status(201).send(req.body)
     } catch (err) {
-      return res.status(500).send({ err: err.message })
+      console.error('CREATE SINGLE CUSTOMER ==>', err)
+      return res.status(500).send({ error: 'Erro ao criar um single customer' })
     }
   }
 

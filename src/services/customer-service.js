@@ -15,20 +15,27 @@ const newVehicle = new Vehicle()
 const newBusinessPartner = new BusinessPartner()
 
 async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-
+  
   var customers = []
   dataCustomers.forEach((data) => {
     var customer = builderCustomer.buildCustomer(data, companyToken)
     customers.push(customer)
   })
 
-  return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+  try {
+    return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+  } catch (err) {
+    console.error('SCHEDULE PERSIST ==>', err)
+    return err
+  }
 }
 
 function translateFields (fields) {
   return fields.map(f => {
     if (f == 'customer_cpfcnpj') return 'cpfcnpj'
-    if (f == 'customer_name') return 'name'
+    else if (f == 'customer_name') return 'name'
+    else if (f == 'customer_email') return 'email'
+    else if (f == 'customer_phone_number') return 'number'
   })
 }
 
@@ -67,6 +74,7 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
       await newBusinessPartner.createOrUpdate(customerId, businessPartner)
     })
   } catch (err) {
+    console.error('PERSIST CUSTOMER ==>', err)
     return err
   }
 }

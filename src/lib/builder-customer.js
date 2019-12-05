@@ -146,6 +146,7 @@ function buildAddress (data) {
 }
 
 function buildEmail (data) {
+  console.log(data)
   var dataEmail = {
     email: data.customer_email
   }

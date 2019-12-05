@@ -5,8 +5,7 @@ class Customer {
   async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId, dataKeyFields) {
     try {
       const customer = await this.getCustomerByKeyFields(dataKeyFields, companyToken)
-      console.log('params', dataKeyFields)
-      console.log('customer', customer)
+      
       if (customer) {
         var business_list = customer.business_list
         var business_template_list = customer.business_template_list
