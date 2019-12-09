@@ -1,11 +1,11 @@
 function buildCustomer (data, companyToken) {
   const dataCustomer = { customer: {}, address: [], email: [], phone: [], vehicle: [], business_partner: [] }
   dataCustomer.customer = {
-    cpfcnpj: data.customer_cpfcnpj,
     company_token: companyToken
   }
 
   if (data.customer_name) dataCustomer.customer.name = data.customer_name
+  if (data.customer_cpfcnpj) dataCustomer.customer.cpfcnpj = data.customer_cpfcnpj
   if (data.customer_cpfcnpj_status) dataCustomer.customer.cpfcnpj_status = data.customer_cpfcnpj_status
   if (data.customer_gender) dataCustomer.customer.gender = data.customer_gender
   if (data.customer_mother_name) dataCustomer.customer.mother_name = data.customer_mother_name
@@ -146,7 +146,6 @@ function buildAddress (data) {
 }
 
 function buildEmail (data) {
-  console.log(data)
   var dataEmail = {
     email: data.customer_email
   }

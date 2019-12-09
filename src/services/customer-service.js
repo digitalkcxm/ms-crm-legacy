@@ -35,18 +35,23 @@ function translateFields (fields) {
     if (f == 'customer_cpfcnpj') return 'cpfcnpj'
     else if (f == 'customer_name') return 'name'
     else if (f == 'customer_email') return 'email'
-    else if (f == 'customer_phone_number') return 'number'
+    else if (f == 'customer_phone_number') return 'phone'
   })
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
   var dataKeyFields = []
   listKeyFields.forEach(f => {
-    dataKeyFields[f] = dataCustomer.customer[f]
+    if (['email', 'phone'].includes(f)) {
+      if (f === 'email') dataKeyFields[f] = dataCustomer.email.map(e => e.email)
+      else if (f === 'phone') dataKeyFields[f] = dataCustomer.phone.map(p => p.number)
+    } else {
+      dataKeyFields[f] = dataCustomer.customer[f]
+    }
   })
   
   try {
-    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
+    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
     await updateCustomer({
       id: customerId,
       customer_cpfcnpj:
