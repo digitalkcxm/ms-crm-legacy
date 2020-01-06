@@ -1,11 +1,11 @@
 function buildCustomer (data, companyToken) {
   const dataCustomer = { customer: {}, address: [], email: [], phone: [], vehicle: [], business_partner: [] }
   dataCustomer.customer = {
-    cpfcnpj: data.customer_cpfcnpj,
     company_token: companyToken
   }
 
   if (data.customer_name) dataCustomer.customer.name = data.customer_name
+  if (data.customer_cpfcnpj) dataCustomer.customer.cpfcnpj = data.customer_cpfcnpj
   if (data.customer_cpfcnpj_status) dataCustomer.customer.cpfcnpj_status = data.customer_cpfcnpj_status
   if (data.customer_gender) dataCustomer.customer.gender = data.customer_gender
   if (data.customer_mother_name) dataCustomer.customer.mother_name = data.customer_mother_name
@@ -40,33 +40,33 @@ function buildCustomer (data, companyToken) {
     }
   }
 
-  var address = []
+  let address = []
   if (data.customer_address && Array.isArray(data.customer_address)) {
     data.customer_address.forEach(ad => {
-      var dataAddress = buildAddress(ad)
+      let dataAddress = buildAddress(ad)
       if (dataAddress.street && dataAddress.cep) {
         address.push(dataAddress)
       }
     })
   } else {
-    var dataAddress = buildAddress(data)
+    let dataAddress = buildAddress(data)
     if (dataAddress.street && dataAddress.cep) {
       address.push(dataAddress)
     }
   }
   dataCustomer.address = address
   
-  var email = []
+  let email = []
   if (data.customer_email && Array.isArray(data.customer_email)) {
     data.customer_email.forEach(e => {
-      var dataEmail = buildEmail(e)
+      let dataEmail = buildEmail(e)
   
       if (dataEmail.email) {
         email.push(dataEmail)
       }
     })
   } else {
-    var dataEmail = buildEmail(data)
+    let dataEmail = buildEmail(data)
 
     if (dataEmail.email) {
       email.push(dataEmail)
@@ -74,17 +74,17 @@ function buildCustomer (data, companyToken) {
   }
   dataCustomer.email = email
 
-  var phone = []
+  let phone = []
   if (data.customer_phone && Array.isArray(data.customer_phone)) {
     data.customer_phone.forEach(pn => {
-      var dataPhone = buildPhone(pn)
+      let dataPhone = buildPhone(pn)
     
       if (dataPhone.number) {
         phone.push(dataPhone)
       }
     })
   } else {
-    var dataPhone = buildPhone(data)
+    let dataPhone = buildPhone(data)
   
     if (dataPhone.number) {
       phone.push(dataPhone)
@@ -94,17 +94,17 @@ function buildCustomer (data, companyToken) {
   dataCustomer.phone = phone
 
   
-  var vehicle = []
+  let vehicle = []
   if (data.customer_vehicle && Array.isArray(data.customer_vehicle)) {
     data.customer_vehicle.forEach(v => {
-      var dataVehicle = buildVehicle(v)
+      let dataVehicle = buildVehicle(v)
     
       if (dataVehicle.plate) {
         vehicle.push(dataVehicle)
       }
     })
   } else {
-    var dataVehicle = buildVehicle(data)
+    let dataVehicle = buildVehicle(data)
   
     if (dataVehicle.plate) {
       vehicle.push(dataVehicle)
@@ -114,17 +114,17 @@ function buildCustomer (data, companyToken) {
   dataCustomer.vehicle = vehicle
   
 
-  var businessPartner = []
+  let businessPartner = []
   if (data.customer_business_partner && Array.isArray(data.customer_business_partner)) {
     data.customer_business_partner.forEach(b => {
-      var business_partner = buildBusinessPartner(b)
+      let business_partner = buildBusinessPartner(b)
     
       if (business_partner.cnpj) {
         businessPartner.push(business_partner)
       }
     })
   } else {
-    var business_partner = buildBusinessPartner(data)
+    let business_partner = buildBusinessPartner(data)
   
     if (business_partner.cnpj) {
       businessPartner.push(business_partner)
@@ -136,7 +136,7 @@ function buildCustomer (data, companyToken) {
 }
 
 function buildAddress (data) {
-  var dataAddress = { street: data.customer_address_street, cep: data.customer_address_cep }
+  let dataAddress = { street: data.customer_address_street, cep: data.customer_address_cep }
   if (data.customer_address_city) dataAddress.city = data.customer_address_city
   if (data.customer_address_state) dataAddress.state = data.customer_address_state
   if (data.customer_address_district) dataAddress.district = data.customer_address_district
@@ -146,20 +146,20 @@ function buildAddress (data) {
 }
 
 function buildEmail (data) {
-  var dataEmail = {
+  let dataEmail = {
     email: data.customer_email
   }
   return dataEmail
 }
 
 function buildPhone (data) {
-  var dataPhone = { number: data.customer_phone_number }
+  let dataPhone = { number: data.customer_phone_number }
   if (data.customer_phone_type)  dataPhone.type = data.customer_phone_type
   return dataPhone
 }
 
 function buildVehicle (data) {
-  var dataVehicle = { plate: data.customer_vehicle_plate }
+  let dataVehicle = { plate: data.customer_vehicle_plate }
   
   if (data.customer_vehicle_model)  dataVehicle.model = data.customer_vehicle_model
   if (data.customer_vehicle_year) dataVehicle.year = data.customer_vehicle_year
@@ -170,7 +170,7 @@ function buildVehicle (data) {
 }
 
 function buildBusinessPartner (data) {
-  var dataBusinessPartner = { cnpj: data.customer_business_partner_cnpj }
+  let dataBusinessPartner = { cnpj: data.customer_business_partner_cnpj }
   if (data.customer_business_partner_fantasy_name) dataBusinessPartner.fantasy_name = data.customer_business_partner_fantasy_name
   if (data.customer_business_partner_status) dataBusinessPartner.status = data.customer_business_partner_status
   if (data.customer_business_partner_foundation_date) dataBusinessPartner.foundation_date = data.customer_business_partner_foundation_date

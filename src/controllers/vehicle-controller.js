@@ -16,7 +16,7 @@ class VehicleController {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
       if (!customer && !customer.length > 0) return res.status(500).send({ err: "Customer não encontrado." })
 
-      var dataVehicle = {
+      const dataVehicle = {
         plate: req.body.plate,
         model: (req.body.model) ? req.body.model : null,
         year: (req.body.year) ? req.body.year : null,
@@ -43,7 +43,7 @@ class VehicleController {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
       if (!customer && !customer.length > 0) return res.status(500).send({ err: "Customer não encontrado." })
 
-      var dataVehicle = req.body
+      const dataVehicle = req.body
 
       const vehicle = await vehicleModel.update(req.params.customerId, req.params.vehicleId, dataVehicle)
       return res.status(201).send(vehicle)

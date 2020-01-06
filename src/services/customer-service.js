@@ -15,31 +15,43 @@ const newVehicle = new Vehicle()
 const newBusinessPartner = new BusinessPartner()
 
 async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-
-  var customers = []
+  
+  let customers = []
   dataCustomers.forEach((data) => {
-    var customer = builderCustomer.buildCustomer(data, companyToken)
+    let customer = builderCustomer.buildCustomer(data, companyToken)
     customers.push(customer)
   })
 
-  return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+  try {
+    return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+  } catch (err) {
+    console.error('SCHEDULE PERSIST ==>', err)
+    return err
+  }
 }
 
 function translateFields (fields) {
   return fields.map(f => {
     if (f == 'customer_cpfcnpj') return 'cpfcnpj'
-    if (f == 'customer_name') return 'name'
+    else if (f == 'customer_name') return 'name'
+    else if (f == 'customer_email') return 'email'
+    else if (f == 'customer_phone_number') return 'phone'
   })
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-  var dataKeyFields = []
+  let dataKeyFields = []
   listKeyFields.forEach(f => {
-    dataKeyFields[f] = dataCustomer.customer[f]
+    if (['email', 'phone'].includes(f)) {
+      if (f === 'email') dataKeyFields[f] = dataCustomer.email.map(e => e.email)
+      else if (f === 'phone') dataKeyFields[f] = dataCustomer.phone.map(p => p.number)
+    } else {
+      dataKeyFields[f] = dataCustomer.customer[f]
+    }
   })
   
   try {
-    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer.cpfcnpj, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
+    const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
     await updateCustomer({
       id: customerId,
       customer_cpfcnpj:
@@ -67,7 +79,7 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
       await newBusinessPartner.createOrUpdate(customerId, businessPartner)
     })
   } catch (err) {
-console.error(err)
+    console.error('PERSIST CUSTOMER ==>', err)
     return err
   }
 }

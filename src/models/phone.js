@@ -2,7 +2,6 @@ const database = require('../config/database/database')
 
 class Phone {
   async createOrUpdate (customerId, newPhone) {
-    console.log(customerId)
     try {
       const phone = await this.getByNumber(customerId, newPhone.number)
       if (phone) {

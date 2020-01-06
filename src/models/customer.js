@@ -2,15 +2,14 @@ const database = require('../config/database/database')
 
 const { formatCustomer } = require('../helpers/format-data-customer')
 class Customer {
-  async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId, listKeyFields) {
+  async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId, listKeyFields = []) {
     try {
       const dataKeyFields = listKeyFields.filter(c => c != undefined)
       const customer = await this.getCustomerByKeyFields(dataKeyFields, companyToken)
-      console.log('params', dataKeyFields)
-      console.log('customer', customer)
+      
       if (customer) {
-        var business_list = customer.business_list
-        var business_template_list = customer.business_template_list
+        let business_list = customer.business_list
+        let business_template_list = customer.business_template_list
         if (Array.isArray(business_list)) business_list = [...new Set(business_list.concat(businessId))]
         else business_list = businessId
         data.business_list = JSON.stringify(business_list)
@@ -27,6 +26,7 @@ class Customer {
         return await this.create(data)
       }
     } catch (err) {
+      console.error('CUSTOMER SAVE ==>', err)
       return err
     }
   }
@@ -43,14 +43,24 @@ class Customer {
 
   async getCustomerByKeyFields (dataKeyFields, companyToken) {
     try {
-      var params = dataKeyFields
-      params.company_token = companyToken
+      const params = dataKeyFields
+      
       const customers = await database('customer')
-        .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'created_at', 'updated_at'])
-        .where(params)
+        .select(['customer.id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'customer.created_at', 'customer.updated_at'])
+        .leftJoin('email', 'email.id_customer', 'customer.id')
+        .leftJoin('phone', 'phone.id_customer', 'customer.id')
+        .where({ company_token: companyToken })
+        .andWhere(query => {
+          Object.keys(params).forEach(param => {
+            if (param === 'email') query.whereIn('email.email', params[param])
+            if (param === 'phone') query.whereIn('phone.number', params[param])
+            if (param === 'cpfcnpj' || param === 'name') query.where(param, params[param])
+          })
+        })
       if (customers) return formatCustomer(customers[0])
       return null
     } catch (err) {
+      console.error('GET CUSTOMER BY KEY FIELDS ===>', err)
       return err
     }
   }
