@@ -2,8 +2,9 @@ const database = require('../config/database/database')
 
 const { formatCustomer } = require('../helpers/format-data-customer')
 class Customer {
-  async createOrUpdate(companyToken, data, businessId, businessTemplateId, dataKeyFields) {
+  async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId, listKeyFields = []) {
     try {
+      const dataKeyFields = listKeyFields.filter(c => c != undefined)
       const customer = await this.getCustomerByKeyFields(dataKeyFields, companyToken)
       
       if (customer) {
@@ -69,6 +70,7 @@ class Customer {
        const customers = await database('customer').select(['id', 'business_list', 'business_template_list']).whereIn('id', list_id).where({ company_token })
        return customers
     } catch(err) {
+console.error(err)
       return err
     }
   }
