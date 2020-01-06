@@ -151,10 +151,14 @@ class CustomerController {
 
   async getAllByCompany(req, res) {
     const companyToken = req.headers['token']
+    let page = -1
+    let limit = 10
+    if (req.query.page) page = parseInt(req.query.page)
+    if (req.query.limit) limit = parseInt(req.query.limit)
 
     try {
       let listCustomers = []
-      let customers = await newCustomer.getAllByCompany(companyToken)
+      let { customers, pagination } = await newCustomer.getAllByCompany(companyToken, page, limit)
       listCustomers = await Promise.all(customers.map(async el => {
         let customer = el
         customer.email = await newEmail.getAllByCustomer(customer.id)
@@ -162,7 +166,7 @@ class CustomerController {
         return customer
       }))
 
-      return res.status(200).send(listCustomers)
+      return res.status(200).send({ customers: listCustomers, pagination })
     } catch (err) {
       return res.status(500).send({ err: err.message })
     }

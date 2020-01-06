@@ -87,13 +87,36 @@ console.error(err)
     }
   }
 
-  async getAllByCompany (company_token) {
+  async getAllByCompany (company_token, page = -1, limit = 10) {
     try {
-      const customers = await database('customer')
-        .select(['id', 'cpfcnpj', 'name'])
-        .where({ company_token })
+      let customers = []
+      let pagination = {}
+      if (page < 0) {
+        customers = await database('customer')
+          .select(['id', 'cpfcnpj', 'name'])
+          .where({ company_token })
+          .orderBy('id')
+      } else {
+        customers = await database('customer')
+          .select(['id', 'cpfcnpj', 'name'])
+          .where({ company_token })
+          .orderBy('id')
+          .offset(page * limit)
+          .limit(limit)
 
-      return customers
+        const customersCount = await database('customer')
+          .select(database.raw('count(*) as total'))
+          .where({ company_token })
+
+        pagination = {
+          total: parseInt(customersCount[0].total),
+          page,
+          firstPage: 0,
+          lastPage: (Math.ceil(parseInt(customersCount[0].total) / limit) - 1)
+        }
+      }
+
+      return { customers, pagination }
     } catch (err) {
       return err
     }
