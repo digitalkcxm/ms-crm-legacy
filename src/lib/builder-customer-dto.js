@@ -1,5 +1,5 @@
 function buildCustomerDTO (customer) {
-  var customerDto = { }
+  let customerDto = {}
 
   if (customer) {
     if (customer.id) customerDto.id = customer.id
@@ -16,8 +16,8 @@ function buildCustomerDTO (customer) {
     if (customer.credit_risk) customerDto.customer_credit_risk = customer.credit_risk
 
     if (customer.email) {
-      var listEmail = customer.email
-      var listEmailFormmated = []
+      let listEmail = customer.email
+      let listEmailFormmated = []
       listEmail.forEach(e => {
         if (e.email) listEmailFormmated.push({ id: e.id, customer_email: e.email })
       })
@@ -25,8 +25,8 @@ function buildCustomerDTO (customer) {
     }
 
     if (customer.address) {
-      var listAddress = customer.address
-      var listAddressFormatted = []
+      let listAddress = customer.address
+      let listAddressFormatted = []
       listAddress.forEach(a => {
         let address = {
           id: a.id,
@@ -43,8 +43,8 @@ function buildCustomerDTO (customer) {
     }
 
     if (customer.business_partner) {
-      var listBusinessPartner = customer.business_partner
-      var listBusinessPartnerFormatted = []
+      let listBusinessPartner = customer.business_partner
+      let listBusinessPartnerFormatted = []
       listBusinessPartner.forEach(b => {
         let business = {
           id: b.id,
@@ -73,8 +73,8 @@ function buildCustomerDTO (customer) {
     }
 
     if (customer.vehicle) {
-      var listVehicle = customer.vehicle
-      var listVehicleFormatted = []
+      let listVehicle = customer.vehicle
+      let listVehicleFormatted = []
       listVehicle.forEach(v => {
         let vehicle = {
           id: v.id,

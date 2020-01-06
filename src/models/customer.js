@@ -7,8 +7,8 @@ class Customer {
       const customer = await this.getCustomerByKeyFields(dataKeyFields, companyToken)
       
       if (customer) {
-        var business_list = customer.business_list
-        var business_template_list = customer.business_template_list
+        let business_list = customer.business_list
+        let business_template_list = customer.business_template_list
         if (Array.isArray(business_list)) business_list = [...new Set(business_list.concat(businessId))]
         else business_list = businessId
         data.business_list = JSON.stringify(business_list)

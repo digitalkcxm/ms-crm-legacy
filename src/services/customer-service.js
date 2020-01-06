@@ -16,9 +16,9 @@ const newBusinessPartner = new BusinessPartner()
 
 async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
   
-  var customers = []
+  let customers = []
   dataCustomers.forEach((data) => {
-    var customer = builderCustomer.buildCustomer(data, companyToken)
+    let customer = builderCustomer.buildCustomer(data, companyToken)
     customers.push(customer)
   })
 
@@ -40,7 +40,7 @@ function translateFields (fields) {
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-  var dataKeyFields = []
+  let dataKeyFields = []
   listKeyFields.forEach(f => {
     if (['email', 'phone'].includes(f)) {
       if (f === 'email') dataKeyFields[f] = dataCustomer.email.map(e => e.email)

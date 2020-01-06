@@ -48,7 +48,7 @@ class CustomerController {
     if (companyToken.length === 0) return res.status(500).send({ err: "Company Token inválido." })
 
     try {
-      var customer = await newCustomer.getByCpfCnpj(req.body.customer_cpfcnpj, companyToken)
+      const customer = await newCustomer.getByCpfCnpj(req.body.customer_cpfcnpj, companyToken)
       if (customer) return res.status(400).send({ err: "Já existe um cadastro com este CPF/CNPJ." })
 
       const customers = [req.body]
@@ -67,16 +67,16 @@ class CustomerController {
     const prefixIndexElastic = req.headers['prefix-index-elastic']
     try {
       const result = await searchCustomer(req.query.search, prefixIndexElastic)
-      var customers = []
+      let customers = []
       if (result && result.length > 0) customers = result.map(r => r._source.doc)
       if (customers.length > 0) customers.push(customers[0])
 
-      var customers_ids = customers.map(c => c.id).filter((value, index, self) => self.indexOf(value) === index)
-      var list_customers = await newCustomer.listById(customers_ids, companyToken)
-      var customersResult = []
+      let customers_ids = customers.map(c => c.id).filter((value, index, self) => self.indexOf(value) === index)
+      const list_customers = await newCustomer.listById(customers_ids, companyToken)
+      let customersResult = []
       customers_ids.forEach(cid => {
-        var customerCache = customers.find(c => c.id == cid)
-        var customer1 = list_customers.find(cus => cus.id == cid)
+        const customerCache = customers.find(c => c.id == cid)
+        const customer1 = list_customers.find(cus => cus.id == cid)
         if (customer1) {
           customerCache.business_list = customer1.business_list
           customerCache.business_template_list = customer1.business_template_list
@@ -96,7 +96,7 @@ class CustomerController {
     const companyToken = req.headers['token']
 
     try {
-      var customer = await newCustomer.getById(req.params.id, companyToken)
+      const customer = await newCustomer.getById(req.params.id, companyToken)
       if (customer) {
         customer.email = await newEmail.getAllByCustomer(customer.id)
         customer.address = await newAddress.getAllByCustomer(customer.id)
@@ -114,7 +114,7 @@ class CustomerController {
     const companyToken = req.headers['token']
 
     try {
-      var customer = await newCustomer.getById(req.params.id, companyToken)
+      let customer = await newCustomer.getById(req.params.id, companyToken)
       if (customer) {
         customer.email = await newEmail.getAllByCustomer(customer.id)
         customer.address = await newAddress.getAllByCustomer(customer.id)
@@ -135,7 +135,7 @@ class CustomerController {
     const companyToken = req.headers['token']
 
     try {
-      var customer = await newCustomer.getByCpfCnpj(req.query.cpfcnpj, companyToken)
+      const customer = await newCustomer.getByCpfCnpj(req.query.cpfcnpj, companyToken)
       if (customer) {
         customer.email = await newEmail.getAllByCustomer(customer.id)
         customer.address = await newAddress.getAllByCustomer(customer.id)
@@ -153,10 +153,10 @@ class CustomerController {
     const companyToken = req.headers['token']
 
     try {
-      var listCustomers = []
-      var customers = await newCustomer.getAllByCompany(companyToken)
-      var listCustomers = await Promise.all(customers.map(async el => {
-        var customer = el
+      let listCustomers = []
+      let customers = await newCustomer.getAllByCompany(companyToken)
+      listCustomers = await Promise.all(customers.map(async el => {
+        let customer = el
         customer.email = await newEmail.getAllByCustomer(customer.id)
         customer.phone = await newPhone.getAllByCustomer(customer.id)
         return customer
@@ -175,7 +175,7 @@ class CustomerController {
       const customer = await newCustomer.getById(req.params.id, companyToken)
       if (!customer) return req.status(400).send({ err: "Customer não encontrado." })
 
-      var customerUpdate = req.body
+      const customerUpdate = req.body
       customerUpdate.customer_cpfcnpj = customer.cpfcnpj
       const customers = [customerUpdate]
       
