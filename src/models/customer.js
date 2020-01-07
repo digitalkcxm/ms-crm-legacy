@@ -2,11 +2,15 @@ const database = require('../config/database/database')
 
 const { formatCustomer } = require('../helpers/format-data-customer')
 class Customer {
-  async createOrUpdate(companyToken, cpfcnpj, data, businessId, businessTemplateId, listKeyFields = []) {
+  async createOrUpdate(companyToken, data, businessId, businessTemplateId, listKeyFields = []) {
     try {
-      const dataKeyFields = listKeyFields.filter(c => c != undefined)
+      let dataKeyFields = {}
+      Object.keys(listKeyFields)
+        .filter(c => c != undefined)
+        .map(k => dataKeyFields[k] = listKeyFields[k])
+
       const customer = await this.getCustomerByKeyFields(dataKeyFields, companyToken)
-      
+
       if (customer) {
         let business_list = customer.business_list
         let business_template_list = customer.business_template_list
@@ -18,12 +22,14 @@ class Customer {
         else business_template_list = businessTemplateId
         data.business_template_list = JSON.stringify(business_template_list)
 
-        return await this.update(customer.id, data)
+        const result = await this.update(customer.id, data)
+        return result
       } else {
         data.company_token = companyToken
         data.business_list = JSON.stringify(businessId)
         data.business_template_list = JSON.stringify(businessTemplateId)
-        return await this.create(data)
+        const result = await this.create(data)
+        return result
       }
     } catch (err) {
       console.error('CUSTOMER SAVE ==>', err)
@@ -37,6 +43,7 @@ class Customer {
         .insert(data, 'id')
       return formatCustomer(customerId[0])
     } catch (err) {
+      console.error('CREATE CUSTOMER=>', err)
       return err
     }
   }
@@ -44,7 +51,7 @@ class Customer {
   async getCustomerByKeyFields (dataKeyFields, companyToken) {
     try {
       const params = dataKeyFields
-      
+
       const customers = await database('customer')
         .select(['customer.id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'customer.created_at', 'customer.updated_at'])
         .leftJoin('email', 'email.id_customer', 'customer.id')
@@ -125,10 +132,11 @@ console.error(err)
   async update(customerId, data) {
     try {
       await database('customer')
-        .update(data, 'id')
+        .update(data)
         .where({ id: customerId })
       return customerId
     } catch (err) {
+      console.error(err)
       return err
     }
   }

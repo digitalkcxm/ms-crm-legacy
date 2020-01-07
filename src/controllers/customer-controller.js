@@ -28,9 +28,11 @@ class CustomerController {
     if (companyToken.length === 0) return res.status(500).send({ err: "Company Token inválido." })
 
     try {
-      await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId], listKeyFields, prefixIndexElastic)
+      const resultPersistCustomers = await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId], listKeyFields, prefixIndexElastic)
+      const resultBody = req.body
+      resultBody.contact_ids = resultPersistCustomers
 
-      res.status(201).send(req.body)
+      res.status(201).send(resultBody)
     } catch (err) {
       console.error('CREATE BATCH CUSTOMER ==>', err)
       return res.status(500).send({ error: 'Erro ao salvar os dados do customer' })

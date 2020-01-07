@@ -23,7 +23,9 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
   })
 
   try {
-    return await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+    const customerId = await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+    
+    return customerId
   } catch (err) {
     console.error('SCHEDULE PERSIST ==>', err)
     return err
@@ -40,7 +42,7 @@ function translateFields (fields) {
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-  let dataKeyFields = []
+  let dataKeyFields = {}
   listKeyFields.forEach(f => {
     if (['email', 'phone'].includes(f)) {
       if (f === 'email') dataKeyFields[f] = dataCustomer.email.map(e => e.email)
@@ -52,6 +54,7 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
   
   try {
     const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
+    
     await updateCustomer({
       id: customerId,
       customer_cpfcnpj:
@@ -78,6 +81,8 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
     await dataCustomer.business_partner.forEach(async (businessPartner) => {
       await newBusinessPartner.createOrUpdate(customerId, businessPartner)
     })
+
+    return customerId
   } catch (err) {
     console.error('PERSIST CUSTOMER ==>', err)
     return err

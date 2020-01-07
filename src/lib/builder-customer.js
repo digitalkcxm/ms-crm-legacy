@@ -1,4 +1,5 @@
 function buildCustomer (data, companyToken) {
+  console.log(data)
   const dataCustomer = { customer: {}, address: [], email: [], phone: [], vehicle: [], business_partner: [] }
   dataCustomer.customer = {
     company_token: companyToken
@@ -78,7 +79,7 @@ function buildCustomer (data, companyToken) {
   if (data.customer_phone && Array.isArray(data.customer_phone)) {
     data.customer_phone.forEach(pn => {
       let dataPhone = buildPhone(pn)
-    
+      
       if (dataPhone.number) {
         phone.push(dataPhone)
       }
@@ -92,7 +93,6 @@ function buildCustomer (data, companyToken) {
   }
 
   dataCustomer.phone = phone
-
   
   let vehicle = []
   if (data.customer_vehicle && Array.isArray(data.customer_vehicle)) {
