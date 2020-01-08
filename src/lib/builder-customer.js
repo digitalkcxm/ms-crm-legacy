@@ -1,5 +1,4 @@
 function buildCustomer (data, companyToken) {
-  console.log(data)
   const dataCustomer = { customer: {}, address: [], email: [], phone: [], vehicle: [], business_partner: [] }
   dataCustomer.customer = {
     company_token: companyToken
