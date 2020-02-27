@@ -23,7 +23,10 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
   })
 
   try {
-    const customerId = await Promise.all(customers.map((customer) => persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)))
+    let customerId = ''
+    for (const customer of customers) {
+    	customerId = await persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)
+    }
     
     return customerId
   } catch (err) {
