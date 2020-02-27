@@ -6,7 +6,12 @@ module.exports = {
       host:     process.env.DB_HOST,
       database: process.env.DB_DATABASE,
       user:     process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
+      connectTimeout: 90000
+    },
+    pool: {
+      min: 1,
+      max: 20,
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -22,7 +27,12 @@ module.exports = {
       host:     process.env.DB_HOST,
       database: process.env.DB_DATABASE,
       user:     process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
+      connectTimeout: 90000
+    },
+    pool: {
+      min: 1,
+      max: 20,
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -38,7 +48,12 @@ module.exports = {
       host:     process.env.DB_HOST,
       database: process.env.DB_DATABASE,
       user:     process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
+      connectTimeout: 90000
+    },
+    pool: {
+      min: 1,
+      max: 20,
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
