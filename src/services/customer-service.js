@@ -1,3 +1,5 @@
+const Queue = require('bull')
+
 const builderCustomer = require('../lib/builder-customer')
 const Customer = require('../models/customer')
 const Email = require('../models/email')
@@ -6,6 +8,7 @@ const Address = require('../models/address')
 const Vehicle = require('../models/vehicle')
 const BusinessPartner = require('../models/business-partner')
 const { updateCustomer } = require('../helpers/elastic')
+const { sendNotificationStorageCompleted } = require('../services/business-service')
 
 const newCustomer = new Customer()
 const newEmail = new Email()
@@ -13,6 +16,15 @@ const newPhone = new Phone()
 const newAddress = new Address()
 const newVehicle = new Vehicle()
 const newBusinessPartner = new BusinessPartner()
+
+function translateFields (fields) {
+  return fields.map(f => {
+    if (f === 'customer_cpfcnpj') return 'cpfcnpj'
+    else if (f === 'customer_name') return 'name'
+    else if (f === 'customer_email') return 'email'
+    else if (f === 'customer_phone_number') return 'phone'
+  })
+}
 
 async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
   
@@ -23,10 +35,19 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
   })
 
   try {
+    const persistQueue = new Queue(`persist-customer-business-${businessId}`, { redis: { port: process.env.REDIS_PORT, host: process.env.REDIS_HOST }})
+
+    const customerPersistList = []
     let customerId = ''
-    for (const customer of customers) {
-    	customerId = await persistCustomer(customer, businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)
-    }
+    customers.forEach(customer => {
+      const customerPersist = { customer, businessId, businessTemplateId, listKeyFields: translateFields(listKeyFields), prefixIndexElastic, companyToken }
+      customerPersistList.push(customerPersist)
+    })
+    
+    persistQueue.add(customerPersistList)
+
+    processQueue(persistQueue)
+    notifyProcessCompleted(persistQueue)
     
     return customerId
   } catch (err) {
@@ -35,16 +56,27 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
   }
 }
 
-function translateFields (fields) {
-  return fields.map(f => {
-    if (f == 'customer_cpfcnpj') return 'cpfcnpj'
-    else if (f == 'customer_name') return 'name'
-    else if (f == 'customer_email') return 'email'
-    else if (f == 'customer_phone_number') return 'phone'
+function processQueue(queue) {
+  queue.process(async (job, done) => {
+    let cont = 1
+    for (const data of job.data) {
+      // console.log('item', cont)
+      await persistCustomer(data.customer, data.businessId, data.businessTemplateId, data.listKeyFields, data.prefixIndexElastic)
+      cont++
+    }
+    
+    done(null, { businessId: job.data[0].businessId, companyToken: job.data[0].companyToken })
+  })
+}
+
+function notifyProcessCompleted(queue) {
+  queue.on('completed', async (job, result) => {
+    await sendNotificationStorageCompleted(result.businessId[0], result.companyToken)
   })
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
+  // console.log('init persist customer', dataCustomer.customer.cpfcnpj)
   let dataKeyFields = {}
   listKeyFields.forEach(f => {
     if (['email', 'phone'].includes(f)) {
@@ -84,6 +116,8 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
     await dataCustomer.business_partner.forEach(async (businessPartner) => {
       await newBusinessPartner.createOrUpdate(customerId, businessPartner)
     })
+
+    // console.log('end persist customer', dataCustomer.customer.cpfcnpj)
 
     return customerId
   } catch (err) {

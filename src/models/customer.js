@@ -53,7 +53,7 @@ class Customer {
       const params = dataKeyFields
 
       const customers = await database('customer')
-        .select(['customer.id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'customer.created_at', 'customer.updated_at', 'business_list', 'business_template_list'])
+        .select(['customer.id', 'cpfcnpj', 'name', 'person_type', 'email.email', 'phone.number', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'customer.created_at', 'customer.updated_at', 'business_list', 'business_template_list'])
         .leftJoin('email', 'email.id_customer', 'customer.id')
         .leftJoin('phone', 'phone.id_customer', 'customer.id')
         .where({ company_token: companyToken })

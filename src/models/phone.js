@@ -58,6 +58,17 @@ class Phone {
       return err
     }
   }
+
+  async listAllByCustomers (customerIdList) {
+    try {
+      const phones = await database('phone')
+        .select(['id', 'number', 'type', 'id_customer'])
+        .whereIn('id_customer', customerIdList)
+      return phones
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = Phone

@@ -75,11 +75,13 @@ class CustomerController {
 
       let customers_ids = customers.map(c => c.id).filter((value, index, self) => self.indexOf(value) === index)
       const list_customers = await newCustomer.listById(customers_ids, companyToken)
+      const list_phones = await newPhone.listAllByCustomers(customers_ids)
       let customersResult = []
       customers_ids.forEach(cid => {
         const customerCache = customers.find(c => c.id == cid)
         const customer1 = list_customers.find(cus => cus.id == cid)
         if (customer1) {
+          // customerCache.customer_phome = list_phones.filter(p => p.id_customer === customerCache.id).map(p => { return { number: p.number, type: p.type } })
           customerCache.business_list = customer1.business_list
           customerCache.business_template_list = customer1.business_template_list
 
