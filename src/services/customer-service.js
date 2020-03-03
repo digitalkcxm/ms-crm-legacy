@@ -18,6 +18,8 @@ const newVehicle = new Vehicle()
 const newBusinessPartner = new BusinessPartner()
 
 function translateFields (fields) {
+  if (!fields) fields = ['customer_cpfcnpj']
+
   return fields.map(f => {
     if (f === 'customer_cpfcnpj') return 'cpfcnpj'
     else if (f === 'customer_name') return 'name'
@@ -71,7 +73,9 @@ function processQueue(queue) {
 
 function notifyProcessCompleted(queue) {
   queue.on('completed', async (job, result) => {
-    await sendNotificationStorageCompleted(result.businessId[0], result.companyToken)
+    if (result.businessId[0]) {
+      await sendNotificationStorageCompleted(result.businessId[0], result.companyToken)
+    }
   })
 }
 

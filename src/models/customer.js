@@ -77,7 +77,7 @@ class Customer {
        const customers = await database('customer').select(['id', 'business_list', 'business_template_list']).whereIn('id', list_id).where({ company_token })
        return customers
     } catch(err) {
-console.error(err)
+      console.error(err)
       return err
     }
   }
@@ -116,7 +116,7 @@ console.error(err)
           .where({ company_token })
 
         pagination = {
-          total: parseInt(customersCount[0].total),
+          nowRows: parseInt(customersCount[0].total),
           page,
           firstPage: 0,
           lastPage: (Math.ceil(parseInt(customersCount[0].total) / limit) - 1)

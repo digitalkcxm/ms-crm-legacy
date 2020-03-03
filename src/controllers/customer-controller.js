@@ -147,6 +147,7 @@ class CustomerController {
         customer.business_partner = await newBusinessPartner.getAllByCustomer(customer.id)
         customer.vehicle = await newVehicle.getAllByCustomer(customer.id)
       }
+
       return res.status(200).send(customer)
     } catch (err) {
       return res.status(500).send({ err: err.message })
