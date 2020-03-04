@@ -152,6 +152,26 @@ class Customer {
       return err
     }
   }
+
+  async searchCustomerByNameCpfEmailPhone (search, company_token) {
+    try {
+      const customers = await database('customer')
+        .select(database.raw('DISTINCT ON(customer.id) customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list'))
+        .leftJoin('email', 'email.id_customer', 'customer.id')
+        .leftJoin('phone', 'phone.id_customer', 'customer.id')
+        .where({ company_token })
+        .andWhere((queryWhere) => {
+          queryWhere.where('customer.name', 'like', `%${search}%`)
+          .orWhere('email.email', 'like', `%${search}%`)
+          .orWhere('phone.number', 'like', `%${search}%`)
+        })
+
+      return customers
+    } catch(err) {
+      console.error(err)
+      return err
+    }
+  }
 }
 
 module.exports = Customer

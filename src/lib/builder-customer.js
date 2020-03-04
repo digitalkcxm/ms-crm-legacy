@@ -65,6 +65,13 @@ function buildCustomer (data, companyToken) {
         email.push(dataEmail)
       }
     })
+  } else if (data.customer_email_address) {
+    data.customer_email = data.customer_email_address
+    let dataEmail = buildEmail(data)
+
+    if (dataEmail.email) {
+      email.push(dataEmail)
+    }
   } else {
     let dataEmail = buildEmail(data)
 

@@ -48,6 +48,17 @@ class Email {
       return err
     }
   }
+
+  async listAllByCustomers (customerIdList) {
+    try {
+      const emails = await database('email')
+        .select(['id', 'email', 'id_customer'])
+        .whereIn('id_customer', customerIdList)
+      return emails
+    } catch (err) {
+      return err
+    }
+  }
 }
 
 module.exports = Email
