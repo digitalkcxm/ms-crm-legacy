@@ -80,7 +80,6 @@ function notifyProcessCompleted(queue) {
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-  console.log('init persist customer', dataCustomer.customer.cpfcnpj)
   let dataKeyFields = {}
   listKeyFields.forEach(f => {
     if (['email', 'phone'].includes(f)) {
@@ -120,8 +119,6 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
     await dataCustomer.business_partner.forEach(async (businessPartner) => {
       await newBusinessPartner.createOrUpdate(customerId, businessPartner)
     })
-
-    console.log('end persist customer', dataCustomer.customer.cpfcnpj)
 
     return customerId
   } catch (err) {
