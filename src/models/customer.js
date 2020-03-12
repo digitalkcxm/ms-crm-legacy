@@ -143,11 +143,21 @@ class Customer {
 
   async getByCpfCnpj (cpfcnpj, company_token) {
     try {
-      const customer = await database('customer')
+      const customers = await database('customer')
         .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'business_list', 'business_template_list'])
         .where({ cpfcnpj, company_token })
-        .orderBy('id', 'desc')
-      if (customer && customer.length > 0) return formatCustomer(customer[0])
+      if (customers && customers.length > 0) {
+        let businessList = []
+        let businessTemplateList = []
+        customers.forEach(customer => {
+          businessList = businessList.concat(customer.business_list)
+          businessTemplateList = businessTemplateList.concat(customer.business_template_list)
+        })
+        customers[0].business_list = [...new Set(businessList)]
+        customers[0].business_template_list = [...new Set(businessTemplateList)]
+        
+        return formatCustomer(customers[0])
+      }
       return null
     } catch (err) {
       return err
