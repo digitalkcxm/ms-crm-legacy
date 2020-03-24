@@ -4,8 +4,8 @@ exports.up = (knex, Promise) => {
   })
 }
 
-exports.down = (knex, Promise) => {
+exports.down = (knex, Promise) => { 
   return knex.schema.alterTable('customer', (table) => {
-    table.string('cpfcnpj').notNullable().alter()
+    table.string('cpfcnpj').nullable().alter()
   })
 }
