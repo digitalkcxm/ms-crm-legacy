@@ -50,10 +50,11 @@ class Address {
 
   async getAllByCustomer (customerId) {
     try {
-      const addressess = await database('address')
-        .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type', 'created_at', 'updated_at'])
+      const addressList = await database('address')
+        .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type'])
         .where({ id_customer: customerId })
-      return addressess
+      
+      return addressList
     } catch (err) {
       return err
     }
