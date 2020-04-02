@@ -55,9 +55,17 @@ class CustomerController {
 
       const customers = [req.body]
       
-      await customerService.schedulePersist(customers, companyToken, [], [], ['customer_cpfcnpj'], req.body.prefixIndexElastic)
+      const customerId = await customerService.schedulePersist(customers, companyToken, [], [], ['customer_cpfcnpj'], req.body.prefixIndexElastic)
 
-      res.status(201).send(req.body)
+      const result = {}
+      Object.keys(req.body).filter(k => k !== 'prefix_index_elastic')
+        .forEach(k => {
+          result[k] = req.body[k]
+        })
+
+      result.customer_id = customerId
+
+      res.status(201).send(result)
     } catch (err) {
       console.error('CREATE SINGLE CUSTOMER ==>', err)
       return res.status(500).send({ error: 'Erro ao criar um single customer' })
