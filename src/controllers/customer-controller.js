@@ -31,7 +31,7 @@ class CustomerController {
       const resultPersistCustomers = await customerService.schedulePersist(customers, companyToken, [businessId], [businessTemplateId], listKeyFields, prefixIndexElastic)
       const resultBody = req.body
       resultBody.contact_ids = resultPersistCustomers
-
+      
       res.status(201).send(resultBody)
     } catch (err) {
       console.error('CREATE BATCH CUSTOMER ==>', err)

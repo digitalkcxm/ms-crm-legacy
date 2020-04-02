@@ -37,19 +37,24 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
   })
 
   try {
-    const persistQueue = new Queue(`persist-customer-business-${businessId}`, { redis: { port: process.env.REDIS_PORT, host: process.env.REDIS_HOST }})
-
-    const customerPersistList = []
     let customerId = ''
-    customers.forEach(customer => {
-      const customerPersist = { customer, businessId, businessTemplateId, listKeyFields: translateFields(listKeyFields), prefixIndexElastic, companyToken }
-      customerPersistList.push(customerPersist)
-    })
-    
-    persistQueue.add(customerPersistList)
+    if (customers.length > 1) {
+      const persistQueue = new Queue(`persist-customer-business-${businessId}`, { redis: { port: process.env.REDIS_PORT, host: process.env.REDIS_HOST }})
 
-    processQueue(persistQueue)
-    notifyProcessCompleted(persistQueue)
+      const customerPersistList = []
+      
+      customers.forEach(customer => {
+        const customerPersist = { customer, businessId, businessTemplateId, listKeyFields: translateFields(listKeyFields), prefixIndexElastic, companyToken }
+        customerPersistList.push(customerPersist)
+      })
+      
+      persistQueue.add(customerPersistList)
+
+      processQueue(persistQueue)
+      notifyProcessCompleted(persistQueue)
+    } else {
+      customerId = await persistCustomer(customers[0], businessId, businessTemplateId, translateFields(listKeyFields), prefixIndexElastic)
+    }
     
     return customerId
   } catch (err) {
@@ -62,7 +67,7 @@ function processQueue(queue) {
   queue.process(async (job, done) => {
     let cont = 1
     for (const data of job.data) {
-      // console.log('item', cont)
+      console.log('item', cont)
       await persistCustomer(data.customer, data.businessId, data.businessTemplateId, data.listKeyFields, data.prefixIndexElastic)
       cont++
     }
@@ -92,6 +97,7 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
   
   try {
     const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
+    console.log('CUSTOMER_ID', customerId)
     
     await updateCustomer({
       id: customerId,
