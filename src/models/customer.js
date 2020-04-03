@@ -173,6 +173,7 @@ class Customer {
         .where({ company_token })
         .andWhere((queryWhere) => {
           queryWhere.where('customer.name', 'like', `%${search}%`)
+          .orWhere('customer.cpfcnpj', 'like', `%${search}%`)
           .orWhere('email.email', 'like', `%${search}%`)
           .orWhere('phone.number', 'like', `%${search}%`)
         })

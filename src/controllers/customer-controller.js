@@ -53,9 +53,13 @@ class CustomerController {
       const customer = await newCustomer.getByCpfCnpj(req.body.customer_cpfcnpj, companyToken)
       if (customer) return res.status(400).send({ err: "Já existe um cadastro com este CPF/CNPJ." })
 
+      const prefixIndexElastic = req.body.prefix_index_elastic
       const customers = [req.body]
+      const templateListId = []
+      const businessLIstId = []
+      const listKeyFields = ['customer_cpfcnpj']
       
-      const customerId = await customerService.schedulePersist(customers, companyToken, [], [], ['customer_cpfcnpj'], req.body.prefixIndexElastic)
+      const customerId = await customerService.schedulePersist(customers, companyToken, templateListId, businessLIstId, listKeyFields, prefixIndexElastic)
 
       const result = {}
       Object.keys(req.body).filter(k => k !== 'prefix_index_elastic')
@@ -204,6 +208,7 @@ class CustomerController {
 
   async update (req, res) {
     const companyToken = req.headers['token']
+    const prefixIndexElastic = req.headers['prefix-index-elastic']
 
     try {
       const customer = await newCustomer.getById(req.params.id, companyToken)
@@ -213,9 +218,9 @@ class CustomerController {
       customerUpdate.customer_cpfcnpj = customer.cpfcnpj
       const customers = [customerUpdate]
       
-      await customerService.schedulePersist(customers, companyToken, [], [])
+      await customerService.schedulePersist(customers, companyToken, [], [], [], prefixIndexElastic)
       
-      return res.sendStatus(200)
+      return res.sendStatus(204)
     } catch (err) {
       return res.status(500).send({ err: err.message })
     }

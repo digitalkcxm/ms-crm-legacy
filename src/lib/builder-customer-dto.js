@@ -10,7 +10,7 @@ function buildCustomerDTO (customer) {
     if (customer.birthdate) customerDto.customer_birthdate = customer.birthdate
     if (customer.gender) customerDto.customer_gender = customer.gender
     if (customer.mother_name) customerDto.customer_mother_name = customer.mother_name
-    if (customer.deceased) customerDto.customer_deceased = customer.deceased
+    if (String(customer.deceased).length) customerDto.customer_deceased = customer.deceased
     if (customer.occupation) customerDto.customer_occupation = customer.occupation
     if (customer.income) customerDto.customer_income = customer.income
     if (customer.credit_risk) customerDto.customer_credit_risk = customer.credit_risk

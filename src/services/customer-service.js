@@ -67,7 +67,7 @@ function processQueue(queue) {
   queue.process(async (job, done) => {
     let cont = 1
     for (const data of job.data) {
-      console.log('item', cont)
+      // console.log('item', cont)
       await persistCustomer(data.customer, data.businessId, data.businessTemplateId, data.listKeyFields, data.prefixIndexElastic)
       cont++
     }
@@ -97,7 +97,7 @@ async function persistCustomer(dataCustomer, businessId, businessTemplateId, lis
   
   try {
     const customerId = await newCustomer.createOrUpdate(dataCustomer.customer.company_token, dataCustomer.customer, businessId, businessTemplateId, dataKeyFields)
-    console.log('CUSTOMER_ID', customerId)
+    // console.log('CUSTOMER_ID', customerId)
     
     await updateCustomer({
       id: customerId,
