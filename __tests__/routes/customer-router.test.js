@@ -4,8 +4,6 @@ const app = require('../../src/config/server')
 const supertest = require('supertest')
 const request = supertest(app)
 
-const { truncateCustomer } = require('../utils/customer')
-
 const companyToken = 'b61a6d542f9036550ba9c401c80f00ef'
 const defaultCPF = '58310918488'
 
@@ -129,10 +127,6 @@ async function createCustomer(customerId = 0, customer = fullCustomer) {
 }
 
 describe('CRUD Customer', () => {
-  beforeEach(async () => {
-    // await truncateCustomer()
-  })
-
   afterAll(() => {
     nock.restore()
     nock.activate()
