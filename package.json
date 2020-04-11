@@ -7,7 +7,13 @@
     "testPathIgnorePatterns": [
       "__tests__/utils"
     ],
-    "setupFilesAfterEnv": ["jest-extended"]
+    "collectCoverage": true,
+    "coverageReporters": [
+      "html"
+    ],
+    "setupFilesAfterEnv": [
+      "jest-extended"
+    ]
   },
   "scripts": {
     "start": "node src/index.js",
@@ -17,7 +23,7 @@
     "migrate:rollback": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback",
     "migrate:reset": "cross-env NODE_ENV=test ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback --all && ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
     "pretest": "cross-env NODE_ENV=test npm run migrate:reset",
-    "test": "cross-env NODE_ENV=test ./node_modules/.bin/run.env jest --coverage --coverageDirectory=coverage"
+    "test": "cross-env NODE_ENV=test ./node_modules/.bin/run.env jest --testTimeout=10000 --detectOpenHandles --runInBand --coverage --coverageDirectory=coverage"
   },
   "author": "Silas Silva <silas.silva@digitalk.com.br>",
   "license": "ISC",
