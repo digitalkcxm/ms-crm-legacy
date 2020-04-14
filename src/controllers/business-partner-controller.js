@@ -29,9 +29,11 @@ class BusinessPartnerController {
     try {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
-      const result = await businessPartnerModel.update(req.params.customerId, req.params.businessPartnerId, req.body)
+      
+      const businessPartner = await businessPartnerModel.update(req.params.customerId, req.params.businessPartnerId, req.body)
+      if (!businessPartner) return res.status(400).send({ err: "Business partner não encontrado." })
 
-      return res.status(201).send(result)
+      return res.status(200).send(businessPartner)
     } catch (err) {
       return res.status(500).send({ err: err.message })
     }

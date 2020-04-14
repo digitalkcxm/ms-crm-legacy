@@ -1,4 +1,5 @@
 const database = require('../config/database/database')
+const moment = require('moment')
 
 class BusinessPartner {
   async createOrUpdate (customerId, newBusinessPartner) {
@@ -16,10 +17,13 @@ class BusinessPartner {
 
   async update (customerId, businessPartnerId, data) {
     try {
-      await database('business_partner')
-        .update(data, 'id')
+      const result = await database('business_partner')
+        .update(data, ['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
         .where({ id_customer: customerId, id: businessPartnerId })
-      return businessPartnerId
+
+      result[0].foundation_date = moment(result[0].foundation_date).format('DD/MM/YYYY')
+
+      return result[0]
     } catch (err) {
       return err
     }
@@ -53,6 +57,7 @@ class BusinessPartner {
       const businessPartnerList = await database('business_partner')
         .select(['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
+
       return businessPartnerList
     } catch (err) {
       return err
