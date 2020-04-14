@@ -33,8 +33,11 @@ class EmailController {
 
     try {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
-      if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
+      if (!customer) return res.status(400).send({ err: "Customer não encontrado." })
+      
       const email = await emailModel.update(customer.id, req.params.emailId, req.body.email)
+
+      if (!email) return res.status(400).send({ err: "E-mail não encontrado." })
       
       return res.status(200).send(email)
     } catch (err) {

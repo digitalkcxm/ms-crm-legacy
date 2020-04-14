@@ -2,7 +2,12 @@ const TestSequencer = require('@jest/test-sequencer').default;
 
 class CustomSequencer extends TestSequencer {
     sort(tests) {
-        const orderPath = ['health', 'customer', 'email'];
+        const orderPath = [
+            'health',
+            'customer',
+            'email',
+            'phone'
+        ];
         return tests.sort((testA, testB) => {
             let filenameA = testA.path.split('/')
             filenameA = filenameA[filenameA.length - 1]

@@ -19,7 +19,9 @@ class Email {
     try {
       const result = await database('email')
         .update({ email }, ['id', 'email', 'created_at', 'updated_at'])
-        .where({ id: emailId, id_customer: customerId })
+        .where('id', emailId)
+        .where('id_customer', customerId)
+
       return result[0]
     } catch (err) {
       return err

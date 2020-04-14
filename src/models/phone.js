@@ -27,10 +27,10 @@ class Phone {
 
   async update (customerId, phoneId, phone) {
     try {
-      await database('phone')
-        .update({ type: phone.type, number: phone.number }, 'id')
+      const result = await database('phone')
+        .update({ type: phone.type, number: phone.number }, ['id', 'number', 'type', 'created_at', 'updated_at'])
         .where({ id_customer: customerId, id: phoneId })
-      return phoneId
+      return result[0]
     } catch (err) {
       return err
     }

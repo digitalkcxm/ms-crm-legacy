@@ -50,11 +50,13 @@ class PhoneController {
 
     try {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
-      if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
+      if (!customer) return res.status(400).send({ err: "Customer não encontrado." })
 
       const { number, type } = req.body
 
       const phone = await phoneModel.update(req.params.customerId, req.params.phoneId, { number, type })
+      if (!phone) return res.status(400).send({ err: "Phone não encontrado." })
+      
       return res.status(200).send(phone)
     } catch (err) {
       return res.status(500).send({ err: err.message })
