@@ -27,10 +27,11 @@ class Address {
 
   async update (customerId, addressId, address) {
     try {
-      await database('address')
-        .update(address, 'id')
+      const result = await database('address')
+        .update(address, ['id', 'street', 'city', 'cep', 'state', 'district', 'type', 'created_at', 'updated_at'])
         .where({ id_customer: customerId, id: addressId })
-      return addressId
+        
+      return result[0]
     } catch (err) {
       return err
     }

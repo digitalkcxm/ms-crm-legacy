@@ -27,10 +27,10 @@ class Vehicle {
 
   async update (customerId, vehicleId, vehicle) {
     try {
-      await database('vehicle')
-        .update(vehicle, 'id')
+      const result = await database('vehicle')
+        .update(vehicle, ['id', 'plate', 'model', 'year', 'renavam', 'chassi', 'license', 'created_at', 'updated_at'])
         .where({ id_customer: customerId, id: vehicleId })
-      return vehicleId
+      return result[0]
     } catch (err) {
       return err
     }

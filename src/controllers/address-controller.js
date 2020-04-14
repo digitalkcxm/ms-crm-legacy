@@ -30,8 +30,10 @@ class AddressController {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
-      await addressModel.update(req.params.customerId, req.params.addressId, req.body)
-      return res.sendStatus(201)
+      const address = await addressModel.update(req.params.customerId, req.params.addressId, req.body)
+      if (!address) return res.status(400).send({ err: "Address não encontrado." })
+
+      return res.status(200).send(address)
     } catch (err) {
       return res.status(500).send({ err: err.message })
     }

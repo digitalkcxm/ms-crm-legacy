@@ -38,7 +38,7 @@ async function createCustomer(customerId = 0, customer = {}) {
     })
 }
 
-describe('CRUD Customer Email', () => {
+describe('CRUD Customer Phone', () => {
     beforeAll(async () => {
       await createCustomer(defaultCustomerId, { customer_cpfcnpj: defaultCPF, prefix_index_elastic: 'test-prefix' })
     })

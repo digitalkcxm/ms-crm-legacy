@@ -6,7 +6,9 @@ class CustomSequencer extends TestSequencer {
             'health',
             'customer',
             'email',
-            'phone'
+            'phone',
+            'address',
+            'vehicle'
         ];
         return tests.sort((testA, testB) => {
             let filenameA = testA.path.split('/')
