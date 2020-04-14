@@ -13,7 +13,8 @@
     ],
     "setupFilesAfterEnv": [
       "jest-extended"
-    ]
+    ],
+    "testSequencer": "./__tests__/utils/custom-sequencer.js"
   },
   "scripts": {
     "start": "node src/index.js",
@@ -23,7 +24,7 @@
     "migrate:rollback": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback",
     "migrate:reset": "cross-env NODE_ENV=test ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback --all && ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
     "pretest": "cross-env NODE_ENV=test npm run migrate:reset",
-    "test": "cross-env NODE_ENV=test ./node_modules/.bin/run.env jest --testTimeout=10000 --detectOpenHandles --runInBand --coverage --coverageDirectory=coverage"
+    "test": "cross-env NODE_ENV=test ./node_modules/.bin/run.env jest --testTimeout=10000 --detectOpenHandles --runInBand"
   },
   "author": "Silas Silva <silas.silva@digitalk.com.br>",
   "license": "ISC",
@@ -46,6 +47,10 @@
   "devDependencies": {
     "cross-env": "^7.0.2",
     "jest": "^25.1.0",
+    "jest-config": "^25.3.0",
+    "jest-serial-runner": "^1.1.0",
+    "klaw-sync": "^6.0.0",
+    "micromatch": "^4.0.2",
     "nodemon": "^1.19.1",
     "supertest": "^4.0.2"
   }

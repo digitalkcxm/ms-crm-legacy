@@ -14,6 +14,7 @@ class EmailController {
 
     try {
       const customer = await customerModel.getById(req.params.customerId, companyToken)
+      
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
       await emailModel.create(customer.id, req.body.email)
       

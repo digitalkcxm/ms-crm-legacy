@@ -86,7 +86,8 @@ class Customer {
     try {
       const customer = await database('customer')
         .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'business_list', 'business_template_list', 'created_at', 'updated_at'])
-        .where({ id, company_token })
+        .where('id', id)
+        .where('company_token', company_token)
       if (customer) return formatCustomer(customer[0])
       return null
     } catch (err) {
