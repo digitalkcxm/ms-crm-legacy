@@ -172,9 +172,10 @@ class Customer {
         .leftJoin('phone', 'phone.id_customer', 'customer.id')
         .where({ company_token })
         .andWhere((queryWhere) => {
-          queryWhere.where('customer.name', 'like', `%${search}%`)
+          queryWhere.whereRaw(`lower(customer.name) like '%${search.toLowerCase()}%'`)
           .orWhere('email.email', 'like', `%${search}%`)
           .orWhere('phone.number', 'like', `%${search}%`)
+          .orWhere('customer.cpfcnpj', 'like', `%${search}%`)
         })
 
       return customers
