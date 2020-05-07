@@ -1,4 +1,6 @@
 const Queue = require('bull')
+const redis = require('redis')
+const redisClient = redis.createClient({ port: process.env.REDIS_PORT, host: process.env.REDIS_HOST })
 
 const builderCustomer = require('../lib/builder-customer')
 const Customer = require('../models/customer')
@@ -80,8 +82,34 @@ function notifyProcessCompleted(queue) {
   queue.on('completed', async (job, result) => {
     if (result.businessId[0]) {
       await sendNotificationStorageCompleted(result.businessId[0], result.companyToken)
+      await removeRedisKey(result.businessId[0])
     }
   })
+}
+
+async function removeRedisKey(businessId = '') {
+  if (String(businessId).length) {
+    const key = `bull:persist-customer-business-${businessId}*`
+    return new Promise((resolve, reject) => {
+      redisClient.scan(0, 'MATCH', key, (err, data) => {
+        if (err) return reject(err)
+        if (data[1]) {
+          return Promise.all(
+            data[1].map(
+              entry =>
+                new Promise((resolve, reject) =>
+                  redisClient.del(entry, (err, data) => {
+                    if (err) return reject(err)
+                    return resolve(data)
+                  })
+                )
+            )
+          )
+        }
+        return resolve()
+      })
+    })
+  }
 }
 
 async function persistCustomer(dataCustomer, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
