@@ -4,10 +4,8 @@ const app = require('../../src/config/server')
 const supertest = require('supertest')
 const request = supertest(app)
 
-const Customer = require('../../src/models/customer')
-const customerModel = new Customer()
-
-const { truncateCustomer } = require('../utils/customer')
+const Email = require('../../src/models/email')
+const emailModel = new Email()
 
 const companyToken = 'b61a6d542f9036550ba9c401c80f00eb'
 const defaultCPF = '38686682170'
@@ -17,15 +15,6 @@ const defaultEmail = { email: 'email@test.com' }
 
 async function createCustomer(customerId = 0, customer = {}) {
     return new Promise((resolve, reject) => {
-      const elasticIndex = customer.prefix_index_elastic
-      const newDate = moment(new Date()).format('YYYYMM')
-        
-      nock('http://localhost:9200')
-        .intercept('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`, 'OPTIONS')
-        .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-        .put('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`)
-        .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-  
       request
         .post('/api/v1/customer')
         .send(customer)
@@ -70,15 +59,16 @@ describe('CRUD Customer Email', () => {
     })
 
     it('Should to update an email by id', async (done) => {
-      request.put(`/api/v1/customers/${defaultCustomerId}/emails/6`)
+      const emailId = await emailModel.create(defaultCustomerId, 'teste1@test.com')
+      request.put(`/api/v1/customers/${defaultCustomerId}/emails/${emailId}`)
           .set('token', companyToken)
-          .send({ email: 'email-updated@email.com' })
+          .send({ email: 'teste1-updated@email.com' })
           .end((err, res) => {
               if (err) done(err)
 
               expect(res.statusCode).toBe(200)
-              expect(res.body.id).toBe(6)
-              expect(res.body.email).toBe('email-updated@email.com')
+              expect(res.body.id).toBe(emailId)
+              expect(res.body.email).toBe('teste1-updated@email.com')
 
               done()
           })

@@ -5,7 +5,6 @@ const Phone = require('../models/phone')
 const Address = require('../models/address')
 const BusinessPartner = require('../models/business-partner')
 const Vehicle = require('../models/vehicle')
-const { searchCustomer } = require('../helpers/elastic')
 const { buildCustomerDTO } = require('../lib/builder-customer-dto')
 
 const newCustomer = new Customer()
@@ -85,21 +84,13 @@ class CustomerController {
     else if (search.trim().length === 0) return res.status(204).send([])
 
     try {
-      const result = await searchCustomer(search, prefixIndexElastic)
       let customers = []
       let customers_ids = []
       let list_customers = []
-      if (result && result.length > 0) customers = result.map(r => r._source.doc)
       
-      if (customers.length > 0)  {
-        customers.push(customers[0])
-        customers_ids = customers.map(c => c.id).filter((value, index, self) => self.indexOf(value) === index)
-        list_customers = await newCustomer.listById(customers_ids, companyToken)
-      } else {
-        customers = await newCustomer.searchCustomerByNameCpfEmailPhone(search, companyToken)
-        list_customers = customers
-        customers_ids = customers.map(c => c.id)
-      }
+      customers = await newCustomer.searchCustomerByNameCpfEmailPhone(search, companyToken)
+      list_customers = customers
+      customers_ids = customers.map(c => c.id)
       
       const list_phones = await newPhone.listAllByCustomers(customers_ids)
       const list_emails = await newEmail.listAllByCustomers(customers_ids)

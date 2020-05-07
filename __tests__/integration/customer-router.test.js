@@ -105,15 +105,6 @@ function newCustomer() {
 
 async function createCustomer(customerId = 0, customer = fullCustomer) {
   return new Promise((resolve, reject) => {
-    const elasticIndex = customer.prefix_index_elastic
-    const newDate = moment(new Date()).format('YYYYMM')
-      
-    nock('http://localhost:9200')
-      .intercept('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`, 'OPTIONS')
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      .put('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`)
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-
     request
       .post('/api/v1/customer')
       .send(customer)
@@ -134,15 +125,6 @@ describe('CRUD Customer', () => {
   afterEach(nock.cleanAll)
 
   it('Create Single Customer', async (done) => {
-    const elasticIndex = fullCustomer.prefix_index_elastic
-    
-    let newDate = moment(new Date()).format('YYYYMM')
-    nock('http://localhost:9200')
-      .intercept('\/' + `${elasticIndex}-crm-${newDate}/customer/1`, 'OPTIONS')
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      .put('\/' + `${elasticIndex}-crm-${newDate}/customer/1`)
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-
     request
       .post('/api/v1/customer')
       .send(fullCustomer)
@@ -232,12 +214,6 @@ describe('CRUD Customer', () => {
 
   it('Should to return list of customers searched by CPF', async (done) => {
     const elasticIndex = 'test'
-    nock('http://localhost:9200')
-      .intercept('\/' + `${elasticIndex}-crm-*/_search?q=*${defaultCPF}*`, 'OPTIONS')
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      .get('\/' + `${elasticIndex}-crm-*/_search?q=*${defaultCPF}*`)
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-
     request.get(`/api/v1/customers/search?search=${defaultCPF}`)
       .set('Accept', 'application/json')
       .set('token', companyToken)
@@ -292,14 +268,8 @@ describe('CRUD Customer', () => {
 
   it('Should to update a customer', async (done) => {
     const elasticIndex = 'test'
-    const newDate = moment(new Date()).format('YYYYMM')
     const customerId = 1
-    nock('http://localhost:9200')
-      .intercept('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`, 'OPTIONS')
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      .put('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`)
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-
+    
     request.put(`/api/v1/customers/${customerId}`)
       .set('token', companyToken)
       .set('prefix-index-elastic', elasticIndex)
@@ -318,7 +288,6 @@ describe('CRUD Customer', () => {
     const prefixIndexElastic = 'testindex'
     const businessId = '1ab2c3'
     const businessTemplateId = '1c2bca'
-    const customerIds = [4,5]
     const customers = []
     const customer1 = newCustomer()
     customer1.customer_cpfcnpj = '07280216250'
@@ -335,21 +304,7 @@ describe('CRUD Customer', () => {
       prefix_index_elastic: prefixIndexElastic
     }
 
-    const newDate = moment(new Date()).format('YYYYMM')
-
-    nock('http://localhost:9200')
-      .intercept('\/' + `${prefixIndexElastic}-crm-${newDate}/customer/${customerIds[0]}`, 'OPTIONS')
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      .put('\/' + `${prefixIndexElastic}-crm-${newDate}/customer/${customerIds[0]}`)
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      
-    nock('http://localhost:9200')
-      .intercept('\/' + `${prefixIndexElastic}-crm-${newDate}/customer/${customerIds[1]}`, 'OPTIONS')
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-      .put('\/' + `${prefixIndexElastic}-crm-${newDate}/customer/${customerIds[1]}`)
-      .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-    
-      nock(process.env.MSBUSINESS_URL)
+    nock(process.env.MSBUSINESS_URL)
       .intercept('\/business/customer-storaging', 'OPTIONS')
       .reply(200, null, {'Access-Control-Allow-Origin': '*', 'Access-Control-Request-Headers': '*'})
       .post('\/business/customer-storaging')
