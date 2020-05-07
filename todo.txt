@@ -1,3 +1,0 @@
-Criar campo na tabela de mensagem
-Texto de email em HTML
-N emails para N departamentos
