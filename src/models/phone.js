@@ -1,26 +1,31 @@
 const database = require('../config/database/database')
 
+const maxQueryParams = 32767
 class Phone {
   async createOrUpdate (customerId, newPhone) {
     try {
       const phone = await this.getByNumber(customerId, newPhone.number)
+      
       if (phone) {
         return await this.update(customerId, phone.id, newPhone)
       } else {
         return await this.create(customerId, newPhone)
       }
     } catch (err) {
+      console.error(err)
       return err
     }
   }
 
   async create (customerId, phone) {
     try {
-      phone.id_customer = customerId
+      phone.id_customer = parseInt(customerId)
       const phoneId = await database('phone')
         .insert(phone, 'id')
+      
       return phoneId[0]
     } catch (err) {
+      console.error(err)
       return err
     }
   }
@@ -66,6 +71,34 @@ class Phone {
         .whereIn('id_customer', customerIdList)
       return phones
     } catch (err) {
+      return err
+    }
+  }
+
+  async persistBatch (phoneList = []) {
+    if (phoneList.length <= 0) return []
+
+    const maxPhoneByInsert = Math.floor(maxQueryParams / 4)
+
+    try {
+      const lastIndexPhoneList = phoneList.length - 1
+      let chunkPhoneList = []
+      let numPhone = 0
+
+      for (let indexPhone in phoneList) {
+        const phone = phoneList[indexPhone]
+        chunkPhoneList.push(phone)
+
+        if (numPhone === maxPhoneByInsert || indexPhone == lastIndexPhoneList) {
+          await database('phone').insert(chunkPhoneList)
+
+          chunkPhoneList = []
+          numPhone = 0
+        }
+        numPhone += 1
+      }
+    } catch (err) {
+      console.error(err)
       return err
     }
   }

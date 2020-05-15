@@ -20,8 +20,11 @@ async function createCustomer(customerId = 0, customer = {}) {
         .send(customer)
         .set('Accept', 'application/json')
         .set('token', companyToken)
-        .end((err) => {
-          if (err) resolve()
+        .end((err, res) => {
+          if (err) reject()
+          
+          defaultCustomerId = res.body.customer_id
+
           resolve()
         })
     })

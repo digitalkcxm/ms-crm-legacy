@@ -1,5 +1,6 @@
 const database = require('../config/database/database')
 
+const maxQueryParams = 32767
 class Address {
   async createOrUpdate (customerId, newAddress) {
     try {
@@ -57,6 +58,35 @@ class Address {
       
       return addressList
     } catch (err) {
+      return err
+    }
+  }
+
+  async persistBatch (addressList = []) {
+    if (addressList.length <= 0) return []
+
+    const maxAddressByInsert = Math.floor(maxQueryParams / 10)
+
+    try {
+      const lastIndexAddressList = addressList.length - 1
+      let chunkAddressList = []
+      let numAddress = 0
+      for (let indexAddress in addressList) {
+        const address = addressList[indexAddress]
+        chunkAddressList.push(address)
+
+        if (numAddress === maxAddressByInsert || indexAddress == lastIndexAddressList) {
+          await database('address').insert(chunkAddressList)
+
+          chunkAddressList = []
+          numAddress = 0
+        }
+
+        numAddress += 1
+      }
+      
+    } catch (err) {
+      console.error(err)
       return err
     }
   }

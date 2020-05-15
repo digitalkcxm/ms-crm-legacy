@@ -1,5 +1,6 @@
 const database = require('../config/database/database')
 
+const maxQueryParams = 32767
 class Vehicle {
   async createOrUpdate (customerId, newVehicle) {
     try {
@@ -55,6 +56,35 @@ class Vehicle {
         .where({ id_customer: customerId })
       return vehicles
     } catch (err) {
+      return err
+    }
+  }
+
+  async persistBatch (vehicleList = []) {
+    if (vehicleList.length <= 0) return []
+    
+    const maxVehicleByInsert = Math.floor(maxQueryParams / 10)
+
+    try {
+      const lastIndexVehicleList = vehicleList.length - 1
+      let chunkVehicleList = []
+      let numVehicle = 0
+
+      for (let indexVehicle in vehicleList) {
+        const vehicle = vehicleList[indexVehicle]
+        chunkVehicleList.push(vehicle)
+
+        if (numVehicle === maxVehicleByInsert || indexVehicle == lastIndexVehicleList) {
+          await database('vehicle').insert(chunkVehicleList)
+          
+          chunkVehicleList = []
+          numVehicle = 0
+        }
+
+        numVehicle += 1
+      }
+    } catch (err) {
+      console.error(err)
       return err
     }
   }

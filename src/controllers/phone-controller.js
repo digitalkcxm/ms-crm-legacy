@@ -20,6 +20,7 @@ class PhoneController {
       const { number, type } = req.body
 
       const phone = await phoneModel.createOrUpdate(req.params.customerId, { number, type })
+      
       return res.sendStatus(201)
     } catch (err) {
       return res.status(500).send({ err: err.message })

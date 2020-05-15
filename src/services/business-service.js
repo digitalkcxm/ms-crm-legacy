@@ -2,7 +2,7 @@ const axios = require('axios')
 
 async function sendNotificationStorageCompleted(businessId, companyToken) {
   try {
-    return await createAxiosInstance(companyToken).post('/business/customer-storaging', { businessId, status: 'completed' })
+    return await createAxiosInstance(companyToken).post('/api/business/customer-storaging', { businessId, status: 'completed' })
   } catch (e) {
     if (process.env.NODE_ENV != 'test')
       console.error('ERRO ENVIAR NOTIFICACAO BUSINESS', { businessId })

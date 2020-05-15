@@ -1,5 +1,6 @@
 const database = require('../config/database/database')
 
+const maxQueryParams = 32767
 class Email {
   async create (customerId, email) {
     try {
@@ -58,6 +59,37 @@ class Email {
         .whereIn('id_customer', customerIdList)
       return emails
     } catch (err) {
+      return err
+    }
+  }
+
+  async persistBatch (emailList = []) {
+    if (emailList.length <= 0) return []
+
+    const maxEmailByInsert = Math.floor(maxQueryParams / 3)
+
+    try {
+      const lastIndexEmailList = emailList.length - 1
+      let chunkEmailList = []
+      let numEmail = 0
+
+      for (let indexEmail in emailList) {
+        const email = emailList[indexEmail]
+        chunkEmailList.push(email)
+
+        if (numEmail === maxEmailByInsert || indexEmail == lastIndexEmailList) {
+          await database('email').insert(chunkEmailList)
+          
+          chunkEmailList = []
+          numEmail = 0
+        }
+
+        numEmail += 1
+      }
+
+      
+    } catch (err) {
+      console.error(err)
       return err
     }
   }

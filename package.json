@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "dev": "./node_modules/.bin/run.env nodemon src/index.js",
+    "dev": "./node_modules/.bin/run.env nodemon --max-old-space-size=4096 src/index.js",
     "migrate:latest": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
     "seed:run": "./node_modules/.bin/run.env ./node_modules/.bin/knex seed:run",
     "migrate:rollback": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback",

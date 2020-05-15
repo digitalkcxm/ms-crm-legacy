@@ -41,6 +41,7 @@ class EmailController {
       
       return res.status(200).send(email)
     } catch (err) {
+      console.error(err)
       return res.status(500).send({ err: err.message })
     }
   }

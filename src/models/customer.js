@@ -1,6 +1,8 @@
 const database = require('../config/database/database')
 
 const { formatCustomer } = require('../helpers/format-data-customer')
+
+const maxQueryParams = 32767
 class Customer {
   async createOrUpdate(companyToken, data, businessId, businessTemplateId, listKeyFields = []) {
     try {
@@ -181,6 +183,183 @@ class Customer {
 
       return customers
     } catch(err) {
+      console.error(err)
+      return err
+    }
+  }
+
+  async getCustomerListByKeyField (searchKeyFieldList = [], searchValueList = [], companyToken = '') {
+    const firstSearchKeyField = searchKeyFieldList[0]
+    const otherSearchKeyFieldList = searchKeyFieldList.slice(1)
+
+    const maxSearchValue = Math.floor(maxQueryParams / searchKeyFieldList.length)
+
+    try {
+      let customers = []
+      const lastIndexSearchValueList = searchValueList.length - 1
+      let numSearchValue = 0
+      let chunkSearchValueList = []
+
+      for (let indexSearchValue in searchValueList) {
+        const searchValue = searchValueList[indexSearchValue]
+
+        chunkSearchValueList.push(searchValue)
+
+        if (numSearchValue === maxSearchValue || indexSearchValue == lastIndexSearchValueList) {
+          const customerResultList = await database('customer')
+            .select(['customer.id', 'cpfcnpj', 'name', 'person_type', 'email.email', 'phone.number', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'customer.created_at', 'customer.updated_at', 'business_list', 'business_template_list'])
+            .leftJoin('email', 'email.id_customer', 'customer.id')
+            .leftJoin('phone', 'phone.id_customer', 'customer.id')
+            .where({ company_token: companyToken })
+            .andWhere(query => {
+              query.whereIn(firstSearchKeyField, chunkSearchValueList)
+
+              otherSearchKeyFieldList.forEach(keyField => {
+                query.orWhereIn(keyField, chunkSearchValueList)
+              })
+            })
+
+          customers.push(...customerResultList)
+
+          chunkSearchValueList = []
+          numSearchValue = 0
+        }
+
+        numSearchValue += 1
+      }
+
+      return customers
+    } catch (err) {
+      return err
+    }
+  }
+
+  async createBatch (customers = []) {
+    if (customers.length <= 0) return []
+
+    const tableFields = Object.keys(customers[0])
+
+    const maxCustomerByQuery = Math.floor(maxQueryParams / (tableFields.length + 1))
+    
+    try {
+      let numCustomerByQuery = 0
+      let customerIdList = []
+      const lastIndexCustomerList = customers.length - 1
+      
+      let queryInsertValues = []
+      let customerBindingValues = {}
+      
+      for (let indexCustomer in customers) {
+        let customerValues = []
+        const customer = customers[indexCustomer]
+
+        tableFields.forEach(tf => {
+          customerValues.push(`:${tf}${indexCustomer}`)
+          customerBindingValues[`${tf}${indexCustomer}`] = customer[tf]
+
+          if (tf === 'business_list' || tf === 'business_template_list') customerBindingValues[`${tf}${indexCustomer}`] = JSON.stringify(customerBindingValues[`${tf}${indexCustomer}`])
+        })
+
+        const value = `(${customerValues.join(',')})`
+        queryInsertValues.push(value)
+
+        if (numCustomerByQuery === maxCustomerByQuery || indexCustomer == lastIndexCustomerList) {
+          const queryInsert = `INSERT INTO customer(${tableFields.join(',')}) VALUES ${queryInsertValues.join(',')} RETURNING id`
+          const createdIdList = await this._execQuery(queryInsert, customerBindingValues)
+
+          customerIdList = customerIdList.concat(createdIdList)
+
+          queryInsertValues = []
+          customerBindingValues = {}
+          numCustomerByQuery = 0
+        }
+
+        numCustomerByQuery += 1
+      }
+
+      return customerIdList
+    } catch (err) {
+      console.log(err)
+      return err
+    }
+  }
+
+  async _execQuery(query = '', bindValues = {}) {
+    if (query === '' || Object.keys(bindValues).length === 0) return []
+
+    try {
+      const queryResult = await database.raw(query, bindValues)
+      return queryResult.rows
+    } catch (err) {
+      console.error(err)
+      return err
+    }
+  }
+
+  async updateBatch (customers = []) {
+    if (customers.length <= 0) return []
+
+    const tableFields = ['id','name', 'cpfcnpj', 'person_type', 'cpfcnpj_status','birthdate', 'gender','mother_name','deceased','occupation','income','credit_risk','company_token','business_list','business_template_list']
+
+    const maxCustomerByQuery = Math.floor(maxQueryParams / (tableFields.length + 1))
+
+    try {
+      let numCustomerByQuery = 0
+      let customerIdList = []
+      const lastIndexCustomerList = customers.length - 1
+
+      let queryUpdateValues = []
+      let customerBindingValues = {}
+      for (let indexCustomer in customers) {
+        const customer = customers[indexCustomer]
+      
+        let customerValues = []
+
+        tableFields.forEach(tf => {
+          customerValues.push(`:${tf}${indexCustomer}`)
+          customerBindingValues[`${tf}${indexCustomer}`] = customer[tf]
+
+          if (tf === 'business_list' || tf === 'business_template_list') customerBindingValues[`${tf}${indexCustomer}`] = JSON.stringify(customerBindingValues[`${tf}${indexCustomer}`])
+        })
+
+        const value = `(${customerValues.join(',')})`
+        queryUpdateValues.push(value)
+
+        if (numCustomerByQuery === maxCustomerByQuery || indexCustomer == lastIndexCustomerList) {
+          const queryUpdate = `UPDATE customer SET
+            name = c.name,
+            cpfcnpj = c.cpfcnpj,
+            person_type = c.person_type,
+            cpfcnpj_status = c.cpfcnpj_status,
+            birthdate = c.birthdate::date,
+            gender = c.gender,
+            mother_name = c.mother_name,
+            deceased = c.deceased::bool,
+            occupation = c.occupation,
+            income = c.income,
+            credit_risk = c.credit_risk,
+            company_token = c.company_token,
+            business_list = c.business_list::json,
+            business_template_list = c.business_template_list::json,
+            updated_at = NOW()
+            FROM (VALUES ${queryUpdateValues.join(',')}) AS c(${tableFields.join(',')})
+            WHERE customer.id = c.id::integer
+            RETURNING customer.id`
+
+          const createdIdList = await this._execQuery(queryUpdate, customerBindingValues)
+
+          customerIdList = customerIdList.concat(createdIdList)
+
+          queryUpdateValues = []
+          customerBindingValues = {}
+          numCustomerByQuery = 0
+        }
+
+        numCustomerByQuery += 1
+      }
+      
+      return customerIdList
+    } catch (err) {
       console.error(err)
       return err
     }

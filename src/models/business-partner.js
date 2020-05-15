@@ -1,6 +1,7 @@
 const database = require('../config/database/database')
 const moment = require('moment')
 
+const maxQueryParams = 32767
 class BusinessPartner {
   async createOrUpdate (customerId, newBusinessPartner) {
     try {
@@ -60,6 +61,35 @@ class BusinessPartner {
 
       return businessPartnerList
     } catch (err) {
+      return err
+    }
+  }
+
+  async persistBatch (businessPartnerList = []) {
+    if (businessPartnerList.length <= 0) return []
+    
+    const maxBusinessPartnerByInsert = Math.floor(maxQueryParams / 10)
+
+    try {
+      const lastIndexBusinessPartnerList = businessPartnerList.length - 1
+      let chunkBusinessPartnerList = []
+      let numBusinessPartner = 0
+
+      for (let indexBusinessPartner in businessPartnerList) {
+        const bp = businessPartnerList[indexBusinessPartner]
+        chunkBusinessPartnerList.push(bp)
+
+        if (numBusinessPartner === maxBusinessPartnerByInsert || indexBusinessPartner == lastIndexBusinessPartnerList) {
+          await database('business_partner').insert(chunkBusinessPartnerList)
+          
+          chunkBusinessPartnerList = []
+          numBusinessPartner = 0
+        }
+
+        numBusinessPartner += 1
+      }
+    } catch (err) {
+      console.error(err)
       return err
     }
   }
