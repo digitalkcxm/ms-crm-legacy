@@ -50,7 +50,7 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
   const customerCreate = []
   const customersIndexed = []
   let searchValues = []
-  // console.time('mount query find')
+  console.time('mount query find')
   for (let i in customers) {
     const dataCustomer = customers[i]
     const values = getCustomerDataByField(dataCustomer, searchKeys)
@@ -58,11 +58,11 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
     
     searchValues.push(...values)
   }
-  // console.timeEnd('mount query find')
+  console.timeEnd('mount query find')
 
-  // console.time('query find')
+  console.time('query find')
   const customerStoredList = await newCustomer.getCustomerListByKeyField(searchKeys, searchValues, companyToken)
-  // console.timeEnd('query find')
+  console.timeEnd('query find')
 
   let customerStoredIndexed = {}
   for (let i in customerStoredList) {
@@ -76,7 +76,7 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
     customerStoredIndexed[indexKey] = customer
   }
 
-  // console.time('separate')
+  console.time('separate')
   for (let i in customersIndexed) {
     let customerMatch = []
     const customerIndexed = customersIndexed[i]
@@ -112,7 +112,7 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
       customerUpdate.push(customerIndexed.dataCustomer)
     }
   }
-  // console.timeEnd('separate')
+  console.timeEnd('separate')
 
   return { customerCreate, customerUpdate }
 }
@@ -179,7 +179,7 @@ async function organizeAdditionalInformationCustomer (customers = [], customerId
   const vehicleList = []
   const businessPartnerList = []
 
-  // console.time('organize')
+  console.time('organize')
   for (let indexCustomer in customers) {
     const c = customers[indexCustomer]
   
@@ -201,36 +201,36 @@ async function organizeAdditionalInformationCustomer (customers = [], customerId
     const customerBusinessPartnerList = setCustomerIdOnBusinessPartnerList(c, customerId)
     businessPartnerList.push(...customerBusinessPartnerList)
   }
-  // console.timeEnd('organize')
+  console.timeEnd('organize')
 
   if (addressList.length) {
-    // console.time('persist address')
+    console.time('persist address')
     await newAddress.persistBatch(addressList)
-    // console.timeEnd('persist address')
+    console.timeEnd('persist address')
   }
 
   if (emailList.length) {
-    // console.time('persist email')
+    console.time('persist email')
     await newEmail.persistBatch(emailList)
-    // console.timeEnd('persist email')
+    console.timeEnd('persist email')
   }
 
   if (phoneList.length) {
-    // console.time('persist phone')
+    console.time('persist phone')
     await newPhone.persistBatch(phoneList)
-    // console.timeEnd('persist phone')
+    console.timeEnd('persist phone')
   }
 
   if (vehicleList.length) {
-    // console.time('persist vehicle')
+    console.time('persist vehicle')
     await newVehicle.persistBatch(vehicleList)
-    // console.timeEnd('persist vehicle')
+    console.timeEnd('persist vehicle')
   }
 
   if (businessPartnerList.length) {
-    // console.time('persist business partner')
+    console.time('persist business partner')
     await newBusinessPartner.persistBatch(businessPartnerList)
-    // console.timeEnd('persist business partner')
+    console.timeEnd('persist business partner')
   }
 
   return {
@@ -278,7 +278,7 @@ async function updateExistCustomerList (customers = [], businessId = '', busines
 }
 
 async function schedulePersist(dataCustomers, companyToken, businessId, businessTemplateId, listKeyFields, prefixIndexElastic) {
-  
+  console.time('persist customer')
   let customers = []
   dataCustomers.forEach((data) => {
     let customer = builderCustomer.buildCustomer(data, companyToken)
@@ -301,6 +301,8 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
       const customersSeparated = await separateBetweenUpdateOrCreate(customers, companyToken, translateFields(listKeyFields), businessId, businessTemplateId)
       newCustomerIdList = await persistNewCustomerList(customersSeparated.customerCreate, businessId, businessTemplateId, companyToken)
       updatedCustomerIdList = await updateExistCustomerList(customersSeparated.customerUpdate, businessId, businessTemplateId, companyToken)
+
+      sendNotificationStorageCompleted(businessId[0], companyToken)
 
       newCustomerIdList.push(...updatedCustomerIdList)
       return newCustomerIdList[0].id

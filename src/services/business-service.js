@@ -1,6 +1,7 @@
 const axios = require('axios')
 
-async function sendNotificationStorageCompleted(businessId, companyToken) {
+async function sendNotificationStorageCompleted(businessId = '', companyToken = '') {
+  console.timeEnd('persist customer')
   try {
     return await createAxiosInstance(companyToken).post('/api/business/customer-storaging', { businessId, status: 'completed' })
   } catch (e) {
