@@ -302,9 +302,10 @@ async function schedulePersist(dataCustomers, companyToken, businessId, business
       newCustomerIdList = await persistNewCustomerList(customersSeparated.customerCreate, businessId, businessTemplateId, companyToken)
       updatedCustomerIdList = await updateExistCustomerList(customersSeparated.customerUpdate, businessId, businessTemplateId, companyToken)
 
-      sendNotificationStorageCompleted(businessId[0], companyToken)
+      if (businessId.length) sendNotificationStorageCompleted(businessId[0], companyToken)
 
       newCustomerIdList.push(...updatedCustomerIdList)
+
       return newCustomerIdList[0].id
     }
 
@@ -365,4 +366,4 @@ async function removeRedisKey(businessId = '') {
   }
 }
 
-module.exports = { schedulePersist }
+module.exports = { schedulePersist, updateExistCustomerList }

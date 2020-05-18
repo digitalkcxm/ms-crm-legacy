@@ -317,8 +317,8 @@ class Customer {
 
         tableFields.forEach(tf => {
           customerValues.push(`:${tf}${indexCustomer}`)
-          customerBindingValues[`${tf}${indexCustomer}`] = customer[tf]
-
+          customerBindingValues[`${tf}${indexCustomer}`] = (customer[tf]) ? customer[tf] : null
+          
           if (tf === 'business_list' || tf === 'business_template_list') customerBindingValues[`${tf}${indexCustomer}`] = JSON.stringify(customerBindingValues[`${tf}${indexCustomer}`])
         })
 

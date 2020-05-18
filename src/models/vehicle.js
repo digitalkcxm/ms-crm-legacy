@@ -5,10 +5,11 @@ class Vehicle {
   async createOrUpdate (customerId, newVehicle) {
     try {
       const vehicle = await this.getByPlate(customerId, newVehicle.plate)
+      
       if (vehicle) {
-        return await this.update(customerId, vehicle.id, newVehicle)
+        await this.update(customerId, vehicle.id, newVehicle)
       } else {
-        return await this.create(customerId, newVehicle)
+        await this.create(customerId, newVehicle)
       }
     } catch (err) {
       return err
@@ -18,9 +19,8 @@ class Vehicle {
   async create (customerId, newVehicle) {
     try {
       newVehicle.id_customer = customerId
-      const vehicleId = await database('vehicle')
-        .insert(newVehicle, 'id')
-      return vehicleId[0]
+      await database('vehicle')
+        .insert(newVehicle)
     } catch (err) {
       return err
     }
@@ -42,6 +42,18 @@ class Vehicle {
       const vehicle = await database('vehicle')
         .select(['id'])
         .where({ id_customer: customerId, plate })
+      if (vehicle && vehicle.length > 0) return vehicle[0]
+      return null
+    } catch (err) {
+      return err
+    }
+  }
+
+  async getById (vehicleId = 0, customerId = 0) {
+    try {
+      const vehicle = await database('vehicle')
+        .select(['id', 'plate', 'model', 'year', 'renavam', 'chassi', 'license', 'created_at', 'updated_at'])
+        .where({ id: vehicleId, id_customer: customerId })
       if (vehicle && vehicle.length > 0) return vehicle[0]
       return null
     } catch (err) {

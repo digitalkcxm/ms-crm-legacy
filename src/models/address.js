@@ -50,6 +50,18 @@ class Address {
     }
   }
 
+  async getById (addressId = 0, customerId = 0) {
+    try {
+      const address = await database('address')
+        .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type'])
+        .where({ id: addressId, id_customer: customerId })
+      if (address && address.length > 0) return address[0]
+      return null
+    } catch (err) {
+      return err
+    }
+  }
+
   async getAllByCustomer (customerId) {
     try {
       const addressList = await database('address')

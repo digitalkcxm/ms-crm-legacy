@@ -13,13 +13,17 @@ class PhoneController {
 
     const companyToken = req.headers['company_token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer && !customer.length > 0) return res.status(500).send({ err: "Customer não encontrado." })
 
       const { number, type } = req.body
 
-      const phone = await phoneModel.createOrUpdate(req.params.customerId, { number, type })
+      await phoneModel.createOrUpdate(req.params.customerId, { number, type })
       
       return res.sendStatus(201)
     } catch (err) {
@@ -30,8 +34,12 @@ class PhoneController {
   async getAll (req, res) {
     const companyToken = req.headers['company_token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
       const phones = await phoneModel.getAllByCustomer(req.params.customerId)
@@ -49,14 +57,22 @@ class PhoneController {
 
     const companyToken = req.headers['company_token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
+    let phoneId = req.params.phoneId
+    if (!phoneId) return res.status(400).send({ error: "O ID do phone é obrigatório." })
+    else phoneId = parseInt(phoneId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer) return res.status(400).send({ err: "Customer não encontrado." })
 
       const { number, type } = req.body
 
-      const phone = await phoneModel.update(req.params.customerId, req.params.phoneId, { number, type })
-      if (!phone) return res.status(400).send({ err: "Phone não encontrado." })
+      await phoneModel.update(customerId, phoneId, { number, type })
+      const phone = await phoneModel.getById(phoneId, customerId)
       
       return res.status(200).send(phone)
     } catch (err) {

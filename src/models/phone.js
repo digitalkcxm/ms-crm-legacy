@@ -7,9 +7,9 @@ class Phone {
       const phone = await this.getByNumber(customerId, newPhone.number)
       
       if (phone) {
-        return await this.update(customerId, phone.id, newPhone)
+        await this.update(customerId, phone.id, newPhone)
       } else {
-        return await this.create(customerId, newPhone)
+        await this.create(customerId, newPhone)
       }
     } catch (err) {
       console.error(err)
@@ -20,10 +20,8 @@ class Phone {
   async create (customerId, phone) {
     try {
       phone.id_customer = parseInt(customerId)
-      const phoneId = await database('phone')
-        .insert(phone, 'id')
-      
-      return phoneId[0]
+      await database('phone')
+        .insert(phone)
     } catch (err) {
       console.error(err)
       return err
@@ -32,10 +30,21 @@ class Phone {
 
   async update (customerId, phoneId, phone) {
     try {
-      const result = await database('phone')
-        .update({ type: phone.type, number: phone.number }, ['id', 'number', 'type', 'created_at', 'updated_at'])
+      await database('phone')
+        .update({ type: phone.type, number: phone.number })
         .where({ id_customer: customerId, id: phoneId })
-      return result[0]
+    } catch (err) {
+      return err
+    }
+  }
+
+  async getById (phoneId = 0, customerId = '') {
+    try {
+      const phone = await database('phone')
+        .select(['id', 'number', 'type', 'created_at', 'updated_at'])
+        .where({ id: phoneId, id_customer: customerId })
+      if (phone && phone.length > 0) return phone[0]
+      return null
     } catch (err) {
       return err
     }

@@ -12,11 +12,16 @@ class AddressController {
 
     const companyToken = req.headers['company_token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
-      await addressModel.createOrUpdate(req.params.customerId, req.body)
+      await addressModel.createOrUpdate(customerId, req.body)
+
       return res.sendStatus(201)
     } catch (err) {
       return res.status(500).send({ err: err.message })
@@ -26,12 +31,21 @@ class AddressController {
   async update (req, res) {
     const companyToken = req.headers['company_token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
+    let addressId = req.params.addressId
+    if (!addressId) return res.status(400).send({ error: "O ID do address é obrigatório." })
+    else addressId = parseInt(addressId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
-      const address = await addressModel.update(req.params.customerId, req.params.addressId, req.body)
-      if (!address) return res.status(400).send({ err: "Address não encontrado." })
+      await addressModel.update(customerId, addressId, req.body)
+
+      const address = await addressModel.getById(addressId, customerId)
 
       return res.status(200).send(address)
     } catch (err) {

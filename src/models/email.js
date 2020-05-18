@@ -4,13 +4,8 @@ const maxQueryParams = 32767
 class Email {
   async create (customerId, email) {
     try {
-      const customerEmail = await this.getByEmail(customerId, email)
-      if (!customerEmail) {
-        const emailId = await database('email')
-          .insert({ email, id_customer: customerId }, 'id')
-        return emailId[0]
-      }
-      return customerEmail.id
+      await database('email')
+        .insert({ email, id_customer: customerId })
     } catch (err) {
       return err
     }
@@ -41,7 +36,7 @@ class Email {
     }
   }
 
-  async getAllByCustomer(customerId) {
+  async getAllByCustomer(customerId = 0) {
     try {
       const emails = await database('email')
         .select(['id', 'email', 'created_at', 'updated_at'])

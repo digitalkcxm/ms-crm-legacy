@@ -12,8 +12,12 @@ class VehicleController {
 
     const companyToken = req.headers['token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer && !customer.length > 0) return res.status(500).send({ err: "Customer não encontrado." })
 
       const dataVehicle = {
@@ -25,9 +29,11 @@ class VehicleController {
         license: (req.body.license) ? req.body.license : null
       }
 
-      const vehicle = await vehicleModel.createOrUpdate(req.params.customerId, dataVehicle)
+      await vehicleModel.createOrUpdate(customerId, dataVehicle)
+
       return res.sendStatus(201)
     } catch (err) {
+      console.error(err)
       return res.status(500).send({ err: err.message })
     }
   }
@@ -39,17 +45,27 @@ class VehicleController {
 
     const companyToken = req.headers['token']
 
+    let customerId = req.params.customerId
+    if (!customerId) return res.status(400).send({ error: "O ID do customer é obrigatório." })
+    else customerId = parseInt(customerId)
+
+    let vehicleId = req.params.vehicleId
+    if (!vehicleId) return res.status(400).send({ error: "O ID do vehicle é obrigatório." })
+    else vehicleId = parseInt(vehicleId)
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer && !customer.length > 0) return res.status(500).send({ err: "Customer não encontrado." })
 
       const dataVehicle = req.body
 
-      const vehicle = await vehicleModel.update(req.params.customerId, req.params.vehicleId, dataVehicle)
-      if (!vehicle) return res.status(400).send({ err: "Vehicle não encontrado." })
+      await vehicleModel.update(customerId, vehicleId, dataVehicle)
+      
+      const vehicle = await vehicleModel.getById(vehicleId, customerId)
 
       return res.status(200).send(vehicle)
     } catch (err) {
+      console.error(err)
       return res.status(500).send({ err: err.message })
     }
   }

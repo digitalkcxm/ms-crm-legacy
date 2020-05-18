@@ -6,6 +6,7 @@ const Address = require('../models/address')
 const BusinessPartner = require('../models/business-partner')
 const Vehicle = require('../models/vehicle')
 const { buildCustomerDTO } = require('../lib/builder-customer-dto')
+const builderCustomer = require('../lib/builder-customer')
 
 const newCustomer = new Customer()
 const newEmail = new Email()
@@ -201,15 +202,21 @@ class CustomerController {
     const companyToken = req.headers['token']
     const prefixIndexElastic = req.headers['prefix-index-elastic']
 
+    const customerId = req.params.id
+    if (!customerId) return res.status(400).send({ error: 'O ID do customer é obrigatório' })
+
     try {
       const customer = await newCustomer.getById(req.params.id, companyToken)
       if (!customer) return req.status(400).send({ err: "Customer não encontrado." })
 
       const customerUpdate = req.body
       customerUpdate.customer_cpfcnpj = customer.cpfcnpj
-      const customers = [customerUpdate]
+      const customers = []
+      customers.push(builderCustomer.buildCustomer(customerUpdate, companyToken))
+      customers[0].id = parseInt(customerId)
+      customers[0].customer.id = parseInt(customerId)
       
-      await customerService.schedulePersist(customers, companyToken, [], [], [], prefixIndexElastic)
+      await customerService.updateExistCustomerList(customers, null, null, companyToken)
       
       return res.sendStatus(204)
     } catch (err) {
