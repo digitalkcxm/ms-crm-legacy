@@ -78,8 +78,7 @@ class CustomerController {
 
   async search (req, res) {
     const companyToken = req.headers['token']
-    const prefixIndexElastic = req.headers['prefix-index-elastic']
-
+    
     const { search } = req.query
     if (!Object.keys(req.query).includes('search')) return res.status(400).send({ error: 'O parâmetro search é obrigatório.' })
     else if (search.trim().length === 0) return res.status(204).send([])
@@ -89,27 +88,52 @@ class CustomerController {
       let customers_ids = []
       let list_customers = []
       
+      console.time('search customer')
       customers = await newCustomer.searchCustomerByNameCpfEmailPhone(search, companyToken)
+      console.timeEnd('search customer')
+
+      const customerListIndexed = {}
+      for (let i in customers) {
+        const customer = customers[i]
+        customerListIndexed[customer.id] = customer
+      }
       list_customers = customers
-      customers_ids = customers.map(c => c.id)
+      customers_ids = Object.keys(customerListIndexed)
+
+      const phoneListIndexed = {}
+      const emailListIndexed = {}
       
       const list_phones = await newPhone.listAllByCustomers(customers_ids)
       const list_emails = await newEmail.listAllByCustomers(customers_ids)
-      let customersResult = []
-      customers_ids.forEach(cid => {
-        const customerCache = customers.find(c => c.id == cid)
-        const customer1 = list_customers.find(cus => cus.id == cid)
-        if (customer1) {
-          if (!customerCache.customer_name) delete customerCache.customer_name
-          customerCache.customer_phome = list_phones.filter(p => p.id_customer === customerCache.id).map(p => { return { number: p.number, type: p.type } })
-          customerCache.customer_email = list_emails.filter(e => e.id_customer === customerCache.id).map(e => { return { email: e.email } })
-          customerCache.business_list = customer1.business_list
-          customerCache.business_template_list = customer1.business_template_list
 
+      for (let i in list_phones) {
+        const phone = list_phones[i]
+        if (!phoneListIndexed[phone.id_customer]) phoneListIndexed[phone.id_customer] = []
+
+        phoneListIndexed[phone.id_customer].push({ number: phone.number, type: phone.type })
+      }
+
+      for (let i in list_emails) {
+        const email = list_emails[i]
+        if (!emailListIndexed[email.id_customer]) emailListIndexed[email.id_customer] = []
+
+        emailListIndexed[email.id_customer].push({ email: email.email })
+      }
+
+      const customersResult = []
+      
+      for (let indexCustomerId in customers_ids) {
+        const cid = customers_ids[indexCustomerId]
+        const customerCache = customerListIndexed[cid]
+        
+        if (customerCache) {
+          customerCache.customer_phome = (phoneListIndexed[cid]) ? phoneListIndexed[cid] : []
+          customerCache.customer_email = (emailListIndexed[cid]) ? emailListIndexed[cid] : []
+          
           customersResult.push(customerCache)
         }
-      })
-
+      }
+      
       return res.status(200).send(customersResult)
     } catch (err) {
       console.error(err)

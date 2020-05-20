@@ -48,10 +48,33 @@ class Email {
   }
 
   async listAllByCustomers (customerIdList) {
+    const emails = []
+
+    if (customerIdList.length === 0) return emails
+
+    const maxSizeCustomerId = Math.floor(maxQueryParams / 2)
+
     try {
-      const emails = await database('email')
-        .select(['id', 'email', 'id_customer'])
-        .whereIn('id_customer', customerIdList)
+      const lastIndexCustomerId = customerIdList.length - 1
+      let chunkCustomerIdList = []
+      let numCustomerId = 0
+
+      for (let iCustomerId in customerIdList) {
+        const customerId = customerIdList[iCustomerId]
+        chunkCustomerIdList.push(customerId)
+
+        if (numCustomerId === maxSizeCustomerId || iCustomerId == lastIndexCustomerId) {
+          const result = await database('email')
+            .select(['id', 'email', 'id_customer'])
+            .whereIn('id_customer', chunkCustomerIdList)
+
+          emails.push(...result)
+          chunkCustomerIdList = []
+          numCustomerId = 0
+        }
+
+        numCustomerId += 1
+      }
       return emails
     } catch (err) {
       return err

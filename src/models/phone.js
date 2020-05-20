@@ -74,12 +74,36 @@ class Phone {
   }
 
   async listAllByCustomers (customerIdList) {
+    let phones = []
+    if (customerIdList.length === 0) return phones
+
+    const maxSizeCustomerId = Math.floor(maxQueryParams / 2)
+
     try {
-      const phones = await database('phone')
-        .select(['id', 'number', 'type', 'id_customer'])
-        .whereIn('id_customer', customerIdList)
+      const lastIndexCustomerId = customerIdList.length - 1
+      let chunkCustomerIdList = []
+      let numCustomerId = 0
+
+      for (let iCustomerId in customerIdList) {
+        const customerId = customerIdList[iCustomerId]
+        chunkCustomerIdList.push(customerId)
+
+        if (numCustomerId === maxSizeCustomerId || iCustomerId == lastIndexCustomerId) {
+          const result = await database('phone')
+                          .select(['id', 'number', 'type', 'id_customer'])
+                          .whereIn('id_customer', chunkCustomerIdList)
+
+          phones.push(...result)
+          chunkCustomerIdList = []
+          numCustomerId = 0
+        }
+
+        numCustomerId += 1
+      }
+
       return phones
     } catch (err) {
+      console.error(err)
       return err
     }
   }
