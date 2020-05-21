@@ -209,13 +209,40 @@ class CustomerController {
     try {
       let listCustomers = []
       let { customers, pagination } = await newCustomer.getAllByCompany(companyToken, page, limit)
-      listCustomers = await Promise.all(customers.map(async el => {
-        let customer = el
-        customer.email = await newEmail.getAllByCustomer(customer.id)
-        customer.phone = await newPhone.getAllByCustomer(customer.id)
-        return customer
-      }))
+      
+      const customerIdList = []
+      for (const i in customers) {
+        const customer = customers[i]
+        customerIdList.push(customer.id)
+      }
 
+      const phoneList = await newPhone.listAllByCustomers(customerIdList)
+      const emailList = await newEmail.listAllByCustomers(customerIdList)
+
+      const phoneListIndexed = {}
+      const emailListIndexed = {}
+      for (const i in phoneList) {
+        const phone = phoneList[i]
+        if (!phoneListIndexed[phone.id_customer]) phoneListIndexed[phone.id_customer] = []
+
+        phoneListIndexed[phone.id_customer].push({ id: phone.id, number: phone.number, type: phone.type, created_at: email.created_at, updated_at: email.updated_at })
+      }
+
+      for (const i in emailList) {
+        const email = emailList[i]
+        if (!emailListIndexed[email.id_customer]) emailListIndexed[email.id_customer] = []
+
+        emailListIndexed[email.id_customer].push({ id: email.id, email: email.email, created_at: email.created_at, updated_at: email.updated_at })
+      }
+
+      for (const i in customers) {
+        const customer = customers[i]
+        customer.email = (emailListIndexed[customer.id]) ? emailListIndexed[customer.id] : []
+        customer.phone = (phoneListIndexed[customer.id]) ? phoneListIndexed[customer.id] : []
+
+        listCustomers.push(customer)
+      }
+      
       return res.status(200).send({ customers: listCustomers, pagination })
     } catch (err) {
       return res.status(500).send({ err: err.message })

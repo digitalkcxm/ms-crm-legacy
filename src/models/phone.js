@@ -90,7 +90,7 @@ class Phone {
 
         if (numCustomerId === maxSizeCustomerId || iCustomerId == lastIndexCustomerId) {
           const result = await database('phone')
-                          .select(['id', 'number', 'type', 'id_customer'])
+                          .select(['id', 'number', 'type', 'id_customer', 'created_at', 'updated_at'])
                           .whereIn('id_customer', chunkCustomerIdList)
 
           phones.push(...result)

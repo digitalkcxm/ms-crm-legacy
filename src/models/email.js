@@ -65,7 +65,7 @@ class Email {
 
         if (numCustomerId === maxSizeCustomerId || iCustomerId == lastIndexCustomerId) {
           const result = await database('email')
-            .select(['id', 'email', 'id_customer'])
+            .select(['id', 'email', 'id_customer', 'created_at', 'updated_at'])
             .whereIn('id_customer', chunkCustomerIdList)
 
           emails.push(...result)
