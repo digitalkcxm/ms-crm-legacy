@@ -225,7 +225,7 @@ class CustomerController {
         const phone = phoneList[i]
         if (!phoneListIndexed[phone.id_customer]) phoneListIndexed[phone.id_customer] = []
 
-        phoneListIndexed[phone.id_customer].push({ id: phone.id, number: phone.number, type: phone.type, created_at: email.created_at, updated_at: email.updated_at })
+        phoneListIndexed[phone.id_customer].push({ id: phone.id, number: phone.number, type: phone.type, created_at: phone.created_at, updated_at: phone.updated_at })
       }
 
       for (const i in emailList) {
