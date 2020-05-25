@@ -63,7 +63,7 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
   console.time('query find')
   const customerStoredList = await newCustomer.getCustomerListByKeyField(searchKeys, searchValues, companyToken)
   console.timeEnd('query find')
-
+  
   let customerStoredIndexed = {}
   for (let i in customerStoredList) {
     const customer = customerStoredList[i]

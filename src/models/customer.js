@@ -189,10 +189,15 @@ class Customer {
   }
 
   async getCustomerListByKeyField (searchKeyFieldList = [], searchValueList = [], companyToken = '') {
-    const firstSearchKeyField = searchKeyFieldList[0]
-    const otherSearchKeyFieldList = searchKeyFieldList.slice(1)
+    const searchkeyFieldListRemap = searchKeyFieldList.map(k => {
+      if (k === 'phone') return 'phone.number'
+      else if (k === 'email') return 'email.email'
+      return k
+    })
+    const firstSearchKeyField = searchkeyFieldListRemap[0]
+    const otherSearchKeyFieldList = searchkeyFieldListRemap.slice(1)
 
-    const maxSearchValue = Math.floor(maxQueryParams / searchKeyFieldList.length)
+    const maxSearchValue = Math.floor(maxQueryParams / searchkeyFieldListRemap.length)
 
     try {
       let customers = []
@@ -207,7 +212,7 @@ class Customer {
 
         if (numSearchValue === maxSearchValue || indexSearchValue == lastIndexSearchValueList) {
           const customerResultList = await database('customer')
-            .select(['customer.id', 'cpfcnpj', 'name', 'person_type', 'email.email', 'phone.number', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'customer.created_at', 'customer.updated_at', 'business_list', 'business_template_list'])
+            .select(database.raw('customer.id, cpfcnpj, name, person_type, email.email as email, phone.number as phone, cpfcnpj_status, birthdate, gender, mother_name, deceased, occupation, income, credit_risk, customer.created_at, customer.updated_at, business_list, business_template_list'))
             .leftJoin('email', 'email.id_customer', 'customer.id')
             .leftJoin('phone', 'phone.id_customer', 'customer.id')
             .where({ company_token: companyToken })
