@@ -6,11 +6,12 @@ class Address {
     try {
       const address = await this.getByStreetAndCep(customerId, newAddress.street, newAddress.cep)
       if (address) {
-        return await this.update(customerId, address.id, newAddress)
+        await this.update(customerId, address.id, newAddress)
       } else {
-        return await this.create(customerId, newAddress)
+        await this.create(customerId, newAddress)
       }
     } catch (err) {
+      console.error(err)
       return err
     }
   }
@@ -18,9 +19,8 @@ class Address {
   async create (customerId, newAddress) {
     try {
       newAddress.id_customer = customerId
-      const addressId = await database('address')
-        .insert(newAddress, 'id')
-      return addressId[0]
+      await database('address')
+        .insert(newAddress)
     } catch (err) {
       return err
     }

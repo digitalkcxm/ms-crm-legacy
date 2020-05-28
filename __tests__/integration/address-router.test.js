@@ -1,11 +1,12 @@
-const moment = require('moment')
-const nock = require('nock')
 const app = require('../../src/config/server')
 const supertest = require('supertest')
 const request = supertest(app)
+const AddressModel = require('../../src/models/address')
+
+const addressModel = new AddressModel()
 
 const companyToken = 'b61a6d542f9036550ba9c401c80f00eb'
-const defaultCPF = '38686682170'
+const defaultCPF = '31686682171'
 let defaultCustomerId = 4
 
 const defaultAddress = {
@@ -19,22 +20,16 @@ const defaultAddress = {
 
 async function createCustomer(customerId = 0, customer = {}) {
     return new Promise((resolve, reject) => {
-      const elasticIndex = customer.prefix_index_elastic
-      const newDate = moment(new Date()).format('YYYYMM')
-        
-      nock('http://localhost:9200')
-        .intercept('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`, 'OPTIONS')
-        .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-        .put('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`)
-        .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-  
       request
         .post('/api/v1/customer')
         .send(customer)
         .set('Accept', 'application/json')
         .set('token', companyToken)
-        .end((err) => {
-          if (err) resolve()
+        .end((err, res) => {
+          if (err) reject()
+          
+          defaultCustomerId = res.body.customer_id
+
           resolve()
         })
     })
@@ -57,13 +52,15 @@ describe('CRUD Customer Address', () => {
         })
     })
 
-    it('Should to list addresses by customer', done => {
+    it('Should to list addresses by customer', async done => {
+      await addressModel.create(defaultCustomerId, defaultAddress)
       request.get(`/api/v1/customers/${defaultCustomerId}/addresses`)
         .set('token', companyToken)
         .end((err, res) => {
           if (err) done(err)
 
           expect(res.statusCode).toBe(200)
+          
           expect(res.body[0]).toHaveProperty('id')
           expect(res.body[0]).toHaveProperty('street')
           expect(res.body[0]).toHaveProperty('cep')

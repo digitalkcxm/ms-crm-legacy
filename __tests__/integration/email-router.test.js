@@ -62,15 +62,18 @@ describe('CRUD Customer Email', () => {
     })
 
     it('Should to update an email by id', async (done) => {
-      const emailId = await emailModel.create(defaultCustomerId, 'teste1@test.com')
-      request.put(`/api/v1/customers/${defaultCustomerId}/emails/${emailId}`)
+      const emailAddress = 'teste1@test.com'
+      await emailModel.create(defaultCustomerId, emailAddress)
+      const email = await emailModel.getByEmail(defaultCustomerId, emailAddress)
+      
+      request.put(`/api/v1/customers/${defaultCustomerId}/emails/${email.id}`)
           .set('token', companyToken)
           .send({ email: 'teste1-updated@email.com' })
           .end((err, res) => {
               if (err) done(err)
 
               expect(res.statusCode).toBe(200)
-              expect(res.body.id).toBe(emailId)
+              expect(res.body.id).toBe(email.id)
               expect(res.body.email).toBe('teste1-updated@email.com')
 
               done()

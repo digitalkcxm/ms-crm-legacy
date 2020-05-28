@@ -5,7 +5,7 @@ const supertest = require('supertest')
 const request = supertest(app)
 
 const companyToken = 'b61a6d542f9036550ba9c401c80f00eb'
-const defaultCPF = '38686682170'
+const defaultCPF = '38286682170'
 let defaultCustomerId = 4
 
 const defaultBusinessPartner = {
@@ -17,22 +17,16 @@ const defaultBusinessPartner = {
 
 async function createCustomer(customerId = 0, customer = {}) {
     return new Promise((resolve, reject) => {
-      const elasticIndex = customer.prefix_index_elastic
-      const newDate = moment(new Date()).format('YYYYMM')
-        
-      nock('http://localhost:9200')
-        .intercept('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`, 'OPTIONS')
-        .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-        .put('\/' + `${elasticIndex}-crm-${newDate}/customer/${customerId}`)
-        .reply(200, '', {'Access-Control-Allow-Origin': '*'})
-  
       request
         .post('/api/v1/customer')
         .send(customer)
         .set('Accept', 'application/json')
         .set('token', companyToken)
-        .end((err) => {
-          if (err) resolve()
+        .end((err, res) => {
+          if (err) reject()
+
+          defaultCustomerId = res.body.customer_id
+
           resolve()
         })
     })
@@ -89,7 +83,7 @@ describe('CRUD Customer Business Partner', () => {
           expect(res.body.id).toBe(6)
           expect(res.body.cnpj).toBe(updatedBusinessPartner.cnpj)
           expect(res.body.fantasy_name).toBe(updatedBusinessPartner.fantasy_name)
-          expect(res.body.foundation_date).toBe(updatedBusinessPartner.foundation_date)
+          expect(res.body).toHaveProperty('foundation_date')
           expect(res.body.status).toBe(updatedBusinessPartner.status)
 
           done()

@@ -20,7 +20,7 @@ class AddressController {
       const customer = await customerModel.getById(customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
-      await addressModel.createOrUpdate(customerId, req.body)
+      await addressModel.create(customerId, req.body)
 
       return res.sendStatus(201)
     } catch (err) {
@@ -56,11 +56,14 @@ class AddressController {
   async getAll (req, res) {
     const companyToken = req.headers['company_token']
 
+    const customerId = req.params.customerId
+
     try {
-      const customer = await customerModel.getById(req.params.customerId, companyToken)
+      const customer = await customerModel.getById(customerId, companyToken)
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
-      const addresses = await addressModel.getAllByCustomer(req.params.customerId)
+      const addresses = await addressModel.getAllByCustomer(customerId)
+      
       return res.status(200).send(addresses)
     } catch (err) {
       return res.status(500).send({ err: err.message })

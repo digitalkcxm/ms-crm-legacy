@@ -1,3 +1,5 @@
+const moment = require('moment')
+
 const Customer = require('../models/customer')
 const BusinessPartner = require('../models/business-partner')
 
@@ -65,7 +67,7 @@ class BusinessPartnerController {
       if (!customer) return res.status(500).send({ err: "Customer não encontrado." })
 
       const partners = await businessPartnerModel.getAllByCustomer(customerId)
-
+      
       return res.status(200).send(partners)
     } catch (err) {
       return res.status(500).send({ err: err.message })
