@@ -86,18 +86,15 @@ class CustomerController {
     try {
       let customers = []
       let customers_ids = []
-      let list_customers = []
       
-      console.time('search customer')
       customers = await newCustomer.searchCustomerByNameCpfEmailPhone(search, companyToken)
-      console.timeEnd('search customer')
-
+      
       const customerListIndexed = {}
       for (let i in customers) {
         const customer = customers[i]
         customerListIndexed[customer.id] = customer
       }
-      list_customers = customers
+      
       customers_ids = Object.keys(customerListIndexed)
 
       const phoneListIndexed = {}
