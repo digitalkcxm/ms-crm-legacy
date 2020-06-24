@@ -255,7 +255,7 @@ class CustomerController {
 
     try {
       const customer = await newCustomer.getById(req.params.id, companyToken)
-      if (!customer) return req.status(400).send({ err: "Customer não encontrado." })
+      if (!customer) return res.status(400).send({ err: "Customer não encontrado." })
 
       const customerUpdate = req.body
       customerUpdate.customer_cpfcnpj = customer.cpfcnpj

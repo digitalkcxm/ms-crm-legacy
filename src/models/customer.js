@@ -119,7 +119,7 @@ class Customer {
           .where({ company_token })
 
         pagination = {
-          nuwRows: parseInt(customersCount[0].total),
+          numRows: parseInt(customersCount[0].total),
           page,
           firstPage: 0,
           lastPage: (Math.ceil(parseInt(customersCount[0].total) / limit) - 1)
