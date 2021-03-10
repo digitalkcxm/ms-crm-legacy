@@ -105,12 +105,12 @@ class Customer {
         customers = await database('customer')
           .select(['id', 'cpfcnpj', 'name'])
           .where({ company_token })
-          .orderBy('id')
+          .orderBy('created_at')
       } else {
         customers = await database('customer')
           .select(['id', 'cpfcnpj', 'name'])
           .where({ company_token })
-          .orderBy('id')
+          .orderBy('created_at')
           .offset(page * limit)
           .limit(limit)
 
