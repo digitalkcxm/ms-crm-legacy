@@ -88,8 +88,17 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
       const transientCustomer = customerIndexed.dataCustomer.customer
       
       transientCustomer.id = customerMatch[0].id
-      transientCustomer.business_list = [...new Set(customerMatch[0].business_list.concat(businessId))]
-      transientCustomer.business_template_list = [...new Set(customerMatch[0].business_template_list.concat(businessTemplateId))]
+      if (customerMatch[0].business_list) {
+        transientCustomer.business_list = [...new Set(customerMatch[0].business_list.concat(businessId))]
+      } else {
+        transientCustomer.business_list = businessId
+      }
+      
+      if (customerMatch[0].business_template_list) {
+        transientCustomer.business_template_list = [...new Set(customerMatch[0].business_template_list.concat(businessTemplateId))]
+      } else {
+        transientCustomer.business_template_list = businessTemplateId
+      }
 
       if (!transientCustomer['name']) transientCustomer.name = customerMatch[0].name
       if (!transientCustomer['cpfcnpj']) transientCustomer.cpfcnpj = customerMatch[0].cpfcnpj
