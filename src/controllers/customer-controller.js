@@ -262,7 +262,11 @@ class CustomerController {
       const customers = []
       customers.push(builderCustomer.buildCustomer(customerUpdate, companyToken))
       customers[0].id = parseInt(customerId)
+      customers[0].business_list = customer.business_list
+      customers[0].business_template_list = customer.business_template_list
       customers[0].customer.id = parseInt(customerId)
+      customers[0].customer.business_list = customer.business_list
+      customers[0].customer.business_template_list = customer.business_template_list
       
       await customerService.updateExistCustomerList(customers, null, null, companyToken)
       
