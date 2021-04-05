@@ -138,6 +138,73 @@ class CustomerController {
     }
   }
 
+  async searchFormatted (req, res) {
+    const companyToken = req.headers['token']
+    
+    const { search } = req.query
+    if (!Object.keys(req.query).includes('search')) return res.status(400).send({ error: 'O parâmetro search é obrigatório.' })
+    else if (search.trim().length === 0) return res.status(204).send([])
+
+    let page = -1
+    let limit = 10
+    if (req.query.page) page = parseInt(req.query.page)
+    if (req.query.limit) limit = parseInt(req.query.limit)
+
+    try {
+      let customers = []
+      let customers_ids = []
+      
+      const searchResult = await newCustomer.searchCustomerFormattedByNameCpfEmailPhone(search, companyToken, page, limit)
+      
+      const customerListIndexed = {}
+      for (let i in searchResult.customers) {
+        const customer = searchResult.customers[i]
+        customerListIndexed[customer.id] = customer
+      }
+      
+      customers_ids = Object.keys(customerListIndexed)
+
+      const phoneListIndexed = {}
+      const emailListIndexed = {}
+      
+      const list_phones = await newPhone.listAllByCustomers(customers_ids)
+      const list_emails = await newEmail.listAllByCustomers(customers_ids)
+
+      for (let i in list_phones) {
+        const phone = list_phones[i]
+        if (!phoneListIndexed[phone.id_customer]) phoneListIndexed[phone.id_customer] = []
+
+        phoneListIndexed[phone.id_customer].push({ number: phone.number, type: phone.type })
+      }
+
+      for (let i in list_emails) {
+        const email = list_emails[i]
+        if (!emailListIndexed[email.id_customer]) emailListIndexed[email.id_customer] = []
+
+        emailListIndexed[email.id_customer].push({ email: email.email })
+      }
+
+      const customersResult = []
+      
+      for (let indexCustomerId in customers_ids) {
+        const cid = customers_ids[indexCustomerId]
+        const customerCache = customerListIndexed[cid]
+        
+        if (customerCache) {
+          customerCache.phone = (phoneListIndexed[cid]) ? phoneListIndexed[cid] : []
+          customerCache.email = (emailListIndexed[cid]) ? emailListIndexed[cid] : []
+          
+          customersResult.push(customerCache)
+        }
+      }
+
+      return res.status(200).send({ customers: customersResult, pagination: searchResult.pagination })
+    } catch (err) {
+      console.error(err)
+      return res.status(500).send({ err: err.message })
+    }
+  }
+
   async getById (req, res) {
     const companyToken = req.headers['token']
 
