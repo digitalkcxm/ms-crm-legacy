@@ -264,15 +264,16 @@ class CustomerController {
   }
 
   async getAllByCompany(req, res) {
-    const companyToken = req.headers['token']
+    const companyToken = req.headers.token
+    const templateId = (req.headers.templateid) ? req.headers.templateid : ''
     let page = -1
     let limit = 10
     if (req.query.page) page = parseInt(req.query.page)
     if (req.query.limit) limit = parseInt(req.query.limit)
-
+    
     try {
       let listCustomers = []
-      let { customers, pagination } = await newCustomer.getAllByCompany(companyToken, page, limit)
+      let { customers, pagination } = await newCustomer.getAllByCompany(companyToken, page, limit, templateId)
       
       const customerIdList = []
       for (const i in customers) {

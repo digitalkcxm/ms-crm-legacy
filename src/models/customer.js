@@ -97,7 +97,7 @@ class Customer {
     }
   }
 
-  async getAllByCompany (company_token, page = -1, limit = 10) {
+  async getAllByCompany (company_token, page = -1, limit = 10, templateId = '') {
     try {
       let customers = []
       let pagination = {}
@@ -105,11 +105,18 @@ class Customer {
         customers = await database('customer')
           .select(['id', 'cpfcnpj', 'name'])
           .where({ company_token })
+          .where((builder) => {
+            builder.where({ company_token })
+            if (templateId && templateId.length) builder.whereRaw(`business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`)
+          })
           .orderBy('created_at')
       } else {
         customers = await database('customer')
           .select(['id', 'cpfcnpj', 'name'])
           .where({ company_token })
+          .where((builder) => {
+            if (templateId && templateId.length) builder.whereRaw(`business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`)
+          })
           .orderBy('created_at')
           .offset(page * limit)
           .limit(limit)
@@ -117,6 +124,9 @@ class Customer {
         const customersCount = await database('customer')
           .select(database.raw('count(*) as total'))
           .where({ company_token })
+          .where((builder) => {
+            if (templateId && templateId.length) builder.whereRaw(`business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`)
+          })
 
         pagination = {
           numRows: parseInt(customersCount[0].total),
