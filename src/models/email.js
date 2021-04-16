@@ -41,6 +41,7 @@ class Email {
       const emails = await database('email')
         .select(['id', 'email', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
+        .orderBy('updated_at', 'desc')
       return emails
     } catch (err) {
       return err
@@ -67,6 +68,7 @@ class Email {
           const result = await database('email')
             .select(['id', 'email', 'id_customer', 'created_at', 'updated_at'])
             .whereIn('id_customer', chunkCustomerIdList)
+            .orderBy('updated_at')
 
           emails.push(...result)
           chunkCustomerIdList = []

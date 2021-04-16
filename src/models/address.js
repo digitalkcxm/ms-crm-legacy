@@ -67,6 +67,7 @@ class Address {
       const addressList = await database('address')
         .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type'])
         .where({ id_customer: customerId })
+        .orderBy('updated_at', 'desc')
       
       return addressList
     } catch (err) {
