@@ -69,6 +69,7 @@ class BusinessPartner {
       const businessPartnerList = await database('business_partner')
         .select(['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
+        .orderBy('updated_at', 'desc')
 
       return businessPartnerList
     } catch (err) {

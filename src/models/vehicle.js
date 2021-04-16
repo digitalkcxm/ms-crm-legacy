@@ -66,6 +66,7 @@ class Vehicle {
       const vehicles = await database('vehicle')
         .select(['id', 'plate', 'model', 'year', 'renavam', 'chassi', 'license', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
+        .orderBy('updated_at', 'desc')
       return vehicles
     } catch (err) {
       return err

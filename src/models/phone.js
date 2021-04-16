@@ -67,6 +67,7 @@ class Phone {
       const phones = await database('phone')
         .select(['id', 'number', 'type', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
+        .orderBy('updated_at', 'desc')
       return phones
     } catch (err) {
       return err
@@ -92,6 +93,7 @@ class Phone {
           const result = await database('phone')
                           .select(['id', 'number', 'type', 'id_customer', 'created_at', 'updated_at'])
                           .whereIn('id_customer', chunkCustomerIdList)
+                          .orderBy('updated_at', 'desc')
 
           phones.push(...result)
           chunkCustomerIdList = []
