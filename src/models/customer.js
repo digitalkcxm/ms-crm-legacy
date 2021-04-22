@@ -181,15 +181,8 @@ class Customer {
     try {
       const customers = await database('customer')
         .select(database.raw('DISTINCT ON(customer.id) customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list'))
-        .leftJoin('email', 'email.id_customer', 'customer.id')
-        .leftJoin('phone', 'phone.id_customer', 'customer.id')
         .where({ company_token })
-        .andWhere((queryWhere) => {
-          queryWhere.whereRaw(`lower(customer.name) like '%${search.toLowerCase()}%'`)
-          .orWhere('email.email', 'like', `%${search}%`)
-          .orWhere('phone.number', 'like', `%${search}%`)
-          .orWhere('customer.cpfcnpj', 'like', `%${search}%`)
-        })
+        .whereRaw('customer.token_search_indexed ilike ?', [`%${search}%`])
 
       return customers
     } catch(err) {
@@ -202,29 +195,15 @@ class Customer {
     try {
       const customers = await database('customer')
         .select(database.raw('DISTINCT ON(customer.id) customer.id, customer.name, customer.cpfcnpj, customer.business_list, customer.business_template_list'))
-        .leftJoin('email', 'email.id_customer', 'customer.id')
-        .leftJoin('phone', 'phone.id_customer', 'customer.id')
         .where({ company_token })
-        .andWhere((queryWhere) => {
-          queryWhere.whereRaw(`lower(customer.name) like '%${search.toLowerCase()}%'`)
-          .orWhere('email.email', 'like', `%${search}%`)
-          .orWhere('phone.number', 'like', `%${search}%`)
-          .orWhere('customer.cpfcnpj', 'like', `%${search}%`)
-        })
+        .whereRaw('customer.token_search_indexed ilike ?', [`%${search}%`])
         .offset(page * limit)
         .limit(limit)
 
       const customersCount = await database('customer')
         .select(database.raw('COUNT(DISTINCT customer.id) AS total'))
-        .leftJoin('email', 'email.id_customer', 'customer.id')
-        .leftJoin('phone', 'phone.id_customer', 'customer.id')
         .where({ company_token })
-        .andWhere((queryWhere) => {
-          queryWhere.whereRaw(`lower(customer.name) like '%${search.toLowerCase()}%'`)
-          .orWhere('email.email', 'like', `%${search}%`)
-          .orWhere('phone.number', 'like', `%${search}%`)
-          .orWhere('customer.cpfcnpj', 'like', `%${search}%`)
-        })
+        .whereRaw('customer.token_search_indexed ilike ?', [`%${search}%`])
 
       const pagination = {
         numRows: parseInt(customersCount[0].total),
