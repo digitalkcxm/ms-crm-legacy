@@ -177,6 +177,30 @@ class Customer {
     }
   }
 
+  async getPoolByCpfCnpj (cpfcnpjList = [], company_token) {
+    try {
+      const customers = await database('customer')
+        .select(['id', 'cpfcnpj', 'name', 'person_type', 'cpfcnpj_status', 'birthdate', 'gender', 'mother_name', 'deceased', 'occupation', 'income', 'credit_risk', 'business_list', 'business_template_list'])
+        .where({ company_token })
+        .whereIn('cpfcnpj', cpfcnpjList)
+      const customersFormatted = customers.map(customer => {
+        let businessList = []
+        let businessTemplateList = []
+        
+        businessList = businessList.concat(customer.business_list)
+        businessTemplateList = businessTemplateList.concat(customer.business_template_list)
+        
+        customer.business_list = [...new Set(businessList)]
+        customer.business_template_list = [...new Set(businessTemplateList)]
+
+        return formatCustomer(customer)
+      })
+      return customersFormatted
+    } catch (err) {
+      return err
+    }
+  }
+
   async searchCustomerByNameCpfEmailPhone (search, company_token) {
     try {
       const customers = await database('customer')

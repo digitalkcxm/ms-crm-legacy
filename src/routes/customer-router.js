@@ -9,6 +9,7 @@ module.exports = (app) => {
   app.post('/api/v1/customer', (req, res) => customerController.create(req, res)),
   app.post('/api/v1/customers', (req, res) => customerController.createBatch(req, res)),
   app.get('/api/v1/customers', (req, res) => customerController.getByCpfCnpj(req, res)),
+  app.post('/api/v1/pool_customers', (req, res) => customerController.getPoolByCpfCnpj(req, res)),
   app.get('/api/v1/customers/search', (req, res) => customerController.search(req, res)),
   app.get('/api/v1/customers/search/formatted', (req, res) => customerController.searchFormatted(req, res)),
   app.get('/api/v1/customers/all', (req, res) => customerController.getAllByCompany(req, res)),
