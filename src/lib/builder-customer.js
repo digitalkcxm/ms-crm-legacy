@@ -1,187 +1,220 @@
-function buildCustomer (data, companyToken) {
-  const dataCustomer = { customer: {}, address: [], email: [], phone: [], vehicle: [], business_partner: [] }
+function buildCustomer(data, companyToken) {
+  const dataCustomer = {
+    customer: {},
+    address: [],
+    email: [],
+    phone: [],
+    vehicle: [],
+    business_partner: [],
+  };
   dataCustomer.customer = {
-    company_token: companyToken
-  }
+    company_token: companyToken,
+  };
 
-  if (data.customer_name) dataCustomer.customer.name = data.customer_name
-  if (data.customer_cpfcnpj) dataCustomer.customer.cpfcnpj = data.customer_cpfcnpj
-  if (data.customer_person_type) dataCustomer.customer.person_type = data.customer_person_type
-  if (data.customer_cpfcnpj_status) dataCustomer.customer.cpfcnpj_status = data.customer_cpfcnpj_status
-  if (data.customer_gender) dataCustomer.customer.gender = data.customer_gender
-  if (data.customer_mother_name) dataCustomer.customer.mother_name = data.customer_mother_name
-  
-  if (data.customer_occupation) dataCustomer.customer.occupation = data.customer_occupation
+  if (data.customer_name) dataCustomer.customer.name = data.customer_name;
+  if (data.customer_cpfcnpj)
+    dataCustomer.customer.cpfcnpj = data.customer_cpfcnpj;
+  if (data.customer_person_type)
+    dataCustomer.customer.person_type = data.customer_person_type;
+  if (data.customer_cpfcnpj_status)
+    dataCustomer.customer.cpfcnpj_status = data.customer_cpfcnpj_status;
+  if (data.customer_gender) dataCustomer.customer.gender = data.customer_gender;
+  if (data.customer_mother_name)
+    dataCustomer.customer.mother_name = data.customer_mother_name;
+
+  if (data.customer_occupation)
+    dataCustomer.customer.occupation = data.customer_occupation;
 
   if (data.customer_deceased) {
     if (data.customer_deceased.toUpperCase().indexOf("N") === 0) {
-      dataCustomer.customer.deceased = false
+      dataCustomer.customer.deceased = false;
     } else {
-      dataCustomer.customer.deceased = true
+      dataCustomer.customer.deceased = true;
     }
   }
-  
-  if (data.customer_credit_risk) dataCustomer.customer.credit_risk = data.customer_credit_risk
+
+  if (data.customer_credit_risk)
+    dataCustomer.customer.credit_risk = data.customer_credit_risk;
 
   if (data.customer_birthdate) {
     if (data.customer_birthdate.indexOf("/") > 0) {
-      let arrDate = data.customer_birthdate.split("/")
-      let strData = `${arrDate[2]}-${arrDate[1]}-${arrDate[0]}`
-      dataCustomer.customer.birthdate = strData
+      let arrDate = data.customer_birthdate.split("/");
+      let strData = `${arrDate[2]}-${arrDate[1]}-${arrDate[0]}`;
+      dataCustomer.customer.birthdate = strData;
+    } else if (data.customer_birthdate.indexOf("/") > 0) {
+      dataCustomer.customer.birthdate = data.customer_birthdate;
     } else {
-      dataCustomer.customer.birthdate = data.customer_birthdate
+      dataCustomer.customer.birthdate = "2000-01-01";
     }
+  } else {
+    dataCustomer.customer.birthdate = "2000-01-01";
   }
 
   if (data.customer_income) {
     if (isNaN(data.customer_income)) {
-      dataCustomer.customer.income = 0
+      dataCustomer.customer.income = 0;
     } else {
-      dataCustomer.customer.income = data.customer_income
+      dataCustomer.customer.income = data.customer_income;
     }
   }
 
-  let address = []
+  let address = [];
   if (data.customer_address && Array.isArray(data.customer_address)) {
-    data.customer_address.forEach(ad => {
-      let dataAddress = buildAddress(ad)
+    data.customer_address.forEach((ad) => {
+      let dataAddress = buildAddress(ad);
       if (dataAddress.street && dataAddress.cep) {
-        address.push(dataAddress)
+        address.push(dataAddress);
       }
-    })
+    });
   } else {
-    let dataAddress = buildAddress(data)
+    let dataAddress = buildAddress(data);
     if (dataAddress.street && dataAddress.cep) {
-      address.push(dataAddress)
+      address.push(dataAddress);
     }
   }
-  dataCustomer.address = address
-  
-  let email = []
+  dataCustomer.address = address;
+
+  let email = [];
   if (data.customer_email && Array.isArray(data.customer_email)) {
-    data.customer_email.forEach(e => {
-      let dataEmail = buildEmail(e)
-  
+    data.customer_email.forEach((e) => {
+      let dataEmail = buildEmail(e);
+
       if (dataEmail.email) {
-        email.push(dataEmail)
+        email.push(dataEmail);
       }
-    })
+    });
   } else if (data.customer_email_address) {
-    data.customer_email = data.customer_email_address
-    let dataEmail = buildEmail(data)
+    data.customer_email = data.customer_email_address;
+    let dataEmail = buildEmail(data);
 
     if (dataEmail.email) {
-      email.push(dataEmail)
+      email.push(dataEmail);
     }
   } else {
-    let dataEmail = buildEmail(data)
+    let dataEmail = buildEmail(data);
 
     if (dataEmail.email) {
-      email.push(dataEmail)
+      email.push(dataEmail);
     }
   }
-  dataCustomer.email = email
+  dataCustomer.email = email;
 
-  let phone = []
+  let phone = [];
   if (data.customer_phone && Array.isArray(data.customer_phone)) {
-    data.customer_phone.forEach(pn => {
-      let dataPhone = buildPhone(pn)
-      
+    data.customer_phone.forEach((pn) => {
+      let dataPhone = buildPhone(pn);
+
       if (dataPhone.number) {
-        phone.push(dataPhone)
+        phone.push(dataPhone);
       }
-    })
+    });
   } else {
-    let dataPhone = buildPhone(data)
-  
+    let dataPhone = buildPhone(data);
+
     if (dataPhone.number) {
-      phone.push(dataPhone)
+      phone.push(dataPhone);
     }
   }
 
-  dataCustomer.phone = phone
-  
-  let vehicle = []
+  dataCustomer.phone = phone;
+
+  let vehicle = [];
   if (data.customer_vehicle && Array.isArray(data.customer_vehicle)) {
-    data.customer_vehicle.forEach(v => {
-      let dataVehicle = buildVehicle(v)
-    
+    data.customer_vehicle.forEach((v) => {
+      let dataVehicle = buildVehicle(v);
+
       if (dataVehicle.plate) {
-        vehicle.push(dataVehicle)
+        vehicle.push(dataVehicle);
       }
-    })
+    });
   } else {
-    let dataVehicle = buildVehicle(data)
-  
+    let dataVehicle = buildVehicle(data);
+
     if (dataVehicle.plate) {
-      vehicle.push(dataVehicle)
+      vehicle.push(dataVehicle);
     }
   }
 
-  dataCustomer.vehicle = vehicle
-  
+  dataCustomer.vehicle = vehicle;
 
-  let businessPartner = []
-  if (data.customer_business_partner && Array.isArray(data.customer_business_partner)) {
-    data.customer_business_partner.forEach(b => {
-      let business_partner = buildBusinessPartner(b)
-    
+  let businessPartner = [];
+  if (
+    data.customer_business_partner &&
+    Array.isArray(data.customer_business_partner)
+  ) {
+    data.customer_business_partner.forEach((b) => {
+      let business_partner = buildBusinessPartner(b);
+
       if (business_partner.cnpj) {
-        businessPartner.push(business_partner)
+        businessPartner.push(business_partner);
       }
-    })
+    });
   } else {
-    let business_partner = buildBusinessPartner(data)
-  
+    let business_partner = buildBusinessPartner(data);
+
     if (business_partner.cnpj) {
-      businessPartner.push(business_partner)
+      businessPartner.push(business_partner);
     }
   }
-  dataCustomer.business_partner = businessPartner
+  dataCustomer.business_partner = businessPartner;
 
-  return dataCustomer 
+  return dataCustomer;
 }
 
-function buildAddress (data) {
-  let dataAddress = { street: data.customer_address_street, cep: data.customer_address_cep }
-  if (data.customer_address_city) dataAddress.city = data.customer_address_city
-  if (data.customer_address_state) dataAddress.state = data.customer_address_state
-  if (data.customer_address_district) dataAddress.district = data.customer_address_district
-  if (data.customer_address_type) dataAddress.type = data.customer_address_type
-  
-  return dataAddress
+function buildAddress(data) {
+  let dataAddress = {
+    street: data.customer_address_street,
+    cep: data.customer_address_cep,
+  };
+  if (data.customer_address_city) dataAddress.city = data.customer_address_city;
+  if (data.customer_address_state)
+    dataAddress.state = data.customer_address_state;
+  if (data.customer_address_district)
+    dataAddress.district = data.customer_address_district;
+  if (data.customer_address_type) dataAddress.type = data.customer_address_type;
+
+  return dataAddress;
 }
 
-function buildEmail (data) {
+function buildEmail(data) {
   let dataEmail = {
-    email: data.customer_email
-  }
-  return dataEmail
+    email: data.customer_email,
+  };
+  return dataEmail;
 }
 
-function buildPhone (data) {
-  let dataPhone = { number: data.customer_phone_number }
-  if (data.customer_phone_type)  dataPhone.type = data.customer_phone_type
-  return dataPhone
+function buildPhone(data) {
+  let dataPhone = { number: data.customer_phone_number };
+  if (data.customer_phone_type) dataPhone.type = data.customer_phone_type;
+  return dataPhone;
 }
 
-function buildVehicle (data) {
-  let dataVehicle = { plate: data.customer_vehicle_plate }
-  
-  if (data.customer_vehicle_model)  dataVehicle.model = data.customer_vehicle_model
-  if (data.customer_vehicle_year) dataVehicle.year = data.customer_vehicle_year
-  if (data.customer_vehicle_renavam)  dataVehicle.renavam = data.customer_vehicle_renavam
-  if (data.customer_vehicle_chassi) dataVehicle.chassi = data.customer_vehicle_chassi
-  if (data.customer_vehicle_license) dataVehicle.license = data.customer_vehicle_license
-  return dataVehicle
+function buildVehicle(data) {
+  let dataVehicle = { plate: data.customer_vehicle_plate };
+
+  if (data.customer_vehicle_model)
+    dataVehicle.model = data.customer_vehicle_model;
+  if (data.customer_vehicle_year) dataVehicle.year = data.customer_vehicle_year;
+  if (data.customer_vehicle_renavam)
+    dataVehicle.renavam = data.customer_vehicle_renavam;
+  if (data.customer_vehicle_chassi)
+    dataVehicle.chassi = data.customer_vehicle_chassi;
+  if (data.customer_vehicle_license)
+    dataVehicle.license = data.customer_vehicle_license;
+  return dataVehicle;
 }
 
-function buildBusinessPartner (data) {
-  let dataBusinessPartner = { cnpj: data.customer_business_partner_cnpj }
-  if (data.customer_business_partner_fantasy_name) dataBusinessPartner.fantasy_name = data.customer_business_partner_fantasy_name
-  if (data.customer_business_partner_status) dataBusinessPartner.status = data.customer_business_partner_status
-  if (data.customer_business_partner_foundation_date) dataBusinessPartner.foundation_date = data.customer_business_partner_foundation_date
-  return dataBusinessPartner
+function buildBusinessPartner(data) {
+  let dataBusinessPartner = { cnpj: data.customer_business_partner_cnpj };
+  if (data.customer_business_partner_fantasy_name)
+    dataBusinessPartner.fantasy_name =
+      data.customer_business_partner_fantasy_name;
+  if (data.customer_business_partner_status)
+    dataBusinessPartner.status = data.customer_business_partner_status;
+  if (data.customer_business_partner_foundation_date)
+    dataBusinessPartner.foundation_date =
+      data.customer_business_partner_foundation_date;
+  return dataBusinessPartner;
 }
 
-module.exports = { buildCustomer }
+module.exports = { buildCustomer };
