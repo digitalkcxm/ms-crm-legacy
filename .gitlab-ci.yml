@@ -247,7 +247,7 @@ deploy_bs:
     - >
       wget --header='PRIVATE-TOKEN: '${AUTOMACAO_TOKEN}'' 'https://gitlab.com/api/v4/projects/24070595/repository/files/deploy_ms_node.sh/raw?ref=master' -O deploy_ms_node.sh
     - chmod +x deploy_ms_node.sh 
-    - sed -i '/ms-server/s/ms-server/apps-servers/g' deploy_ms_node
+    - sed -i '/ms-server/s/ms-server/apps-servers/g' deploy_ms_node.sh
     - ./deploy_ms_node.sh
 
     - >
