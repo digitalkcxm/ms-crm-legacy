@@ -177,8 +177,9 @@ function buildAddress(data) {
 }
 
 function buildEmail(data) {
+  const email = encodeURI(String(data.customer_email)).replace(new RegExp("s/\x00//g"),"").replace('%00', '')
   let dataEmail = {
-    email: data.customer_email,
+    email,
   };
   return dataEmail;
 }
