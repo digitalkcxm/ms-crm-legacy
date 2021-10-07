@@ -42,7 +42,7 @@ class Email {
         .select(['id', 'email', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
         .orderBy('updated_at', 'desc')
-      return emails
+      return emails.filter(e => e.email)
     } catch (err) {
       return err
     }
@@ -65,11 +65,12 @@ class Email {
         chunkCustomerIdList.push(customerId)
 
         if (numCustomerId === maxSizeCustomerId || iCustomerId == lastIndexCustomerId) {
-          const result = await database('email')
+          let result = await database('email')
             .select(['id', 'email', 'id_customer', 'created_at', 'updated_at'])
             .whereIn('id_customer', chunkCustomerIdList)
             .orderBy('updated_at', 'desc')
 
+          result = result.filter(e => e.email)
           emails.push(...result)
           chunkCustomerIdList = []
           numCustomerId = 0

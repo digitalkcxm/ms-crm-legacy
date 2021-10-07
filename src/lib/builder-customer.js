@@ -76,7 +76,7 @@ function buildCustomer(data, companyToken) {
 
   let email = [];
   if (data.customer_email && Array.isArray(data.customer_email)) {
-    data.customer_email.forEach((e) => {
+    data.customer_email.filter(e => e.customer_email).forEach((e) => {
       let dataEmail = buildEmail(e);
 
       if (dataEmail.email) {
@@ -90,7 +90,7 @@ function buildCustomer(data, companyToken) {
     if (dataEmail.email) {
       email.push(dataEmail);
     }
-  } else {
+  } else if (data.customer_email) {
     let dataEmail = buildEmail(data);
 
     if (dataEmail.email) {
@@ -101,14 +101,15 @@ function buildCustomer(data, companyToken) {
 
   let phone = [];
   if (data.customer_phone && Array.isArray(data.customer_phone)) {
-    data.customer_phone.forEach((pn) => {
+    data.customer_phone.filter(p => p.customer_phone_number && parseInt(p.customer_phone_number) > 0).forEach((pn) => {
       let dataPhone = buildPhone(pn);
 
       if (dataPhone.number) {
         phone.push(dataPhone);
       }
     });
-  } else {
+  } else if (data.customer_phone_number && parseInt(data.customer_phone_number) > 0) {
+
     let dataPhone = buildPhone(data);
 
     if (dataPhone.number) {
