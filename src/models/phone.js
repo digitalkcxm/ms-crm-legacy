@@ -68,7 +68,7 @@ class Phone {
         .select(['id', 'number', 'type', 'created_at', 'updated_at'])
         .where({ id_customer: customerId })
         .orderBy('updated_at', 'desc')
-      return phones
+      return phones.filter(p => p.number && parseInt(p.number) > 0)
     } catch (err) {
       return err
     }
@@ -90,11 +90,12 @@ class Phone {
         chunkCustomerIdList.push(customerId)
 
         if (numCustomerId === maxSizeCustomerId || iCustomerId == lastIndexCustomerId) {
-          const result = await database('phone')
+          let result = await database('phone')
                           .select(['id', 'number', 'type', 'id_customer', 'created_at', 'updated_at'])
                           .whereIn('id_customer', chunkCustomerIdList)
                           .orderBy('updated_at', 'desc')
 
+          result = result.filter(p => p.number && parseInt(p.number) > 0)
           phones.push(...result)
           chunkCustomerIdList = []
           numCustomerId = 0
