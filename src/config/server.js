@@ -28,6 +28,11 @@ vehicleRoutes(app)
 addressRoutes(app)
 businessPartnerRoutes(app)
 
+global.cache = {
+  customerList: {},
+  default_expire: (process.env.EXPIRE_CACHE_IN_SEC) ? parseInt(process.env.EXPIRE_CACHE_IN_SEC) : 600
+}
+
 const port = process.env.PORT || 4000
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {

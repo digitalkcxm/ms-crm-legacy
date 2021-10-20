@@ -160,34 +160,32 @@ class Customer {
           .where((builder) => {
             builder.where({ company_token });
             if (templateId && templateId.length)
-              builder.whereRaw(
-                `business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`
-              );
+              builder.whereRaw(`business_template_list::text ilike ?`, [`%${templateId}%`])
           })
           .orderBy("created_at");
       } else {
+        console.time('search')
         customers = await database("customer")
           .select(["id", "cpfcnpj", "name"])
           .where({ company_token })
           .where((builder) => {
             if (templateId && templateId.length)
-              builder.whereRaw(
-                `business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`
-              );
+              builder.whereRaw(`business_template_list::text ilike ?`, [`%${templateId}%`])
           })
           .orderBy("created_at")
           .offset(page * limit)
           .limit(limit);
+        console.timeEnd('search')
 
+        console.time('count')
         const customersCount = await database("customer")
           .select(database.raw("count(*) as total"))
           .where({ company_token })
           .where((builder) => {
             if (templateId && templateId.length)
-              builder.whereRaw(
-                `business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`
-              );
+              builder.whereRaw(`business_template_list::text ilike ?`, [`%${templateId}%`])
           });
+        console.timeEnd('count')
 
         pagination = {
           numRows: parseInt(customersCount[0].total),
@@ -298,7 +296,7 @@ class Customer {
     }
   }
 
-  async searchCustomerByNameCpfEmailPhone(search, company_token) {
+  async searchCustomerByNameCpfEmailPhone(search, company_token, templateId = '') {
     try {
       const customers = await database("customer")
         .select(
@@ -307,7 +305,15 @@ class Customer {
           )
         )
         .where({ company_token })
-        .whereRaw("customer.token_search_indexed ilike ?", [`%${search}%`]);
+        .whereRaw("customer.token_search_indexed ilike ?", [`%${search}%`])
+        .where((query) => {
+          if (templateId && templateId.length) {
+            templateId = templateId.trim()
+            query.whereRaw(
+              `customer.business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`
+            );
+          }
+        });
 
       return customers;
     } catch (err) {
@@ -319,6 +325,7 @@ class Customer {
   async searchCustomerFormattedByNameCpfEmailPhone(
     search,
     company_token,
+    templateId = '',
     page = 0,
     limit = 10
   ) {
@@ -331,13 +338,29 @@ class Customer {
         )
         .where({ company_token })
         .whereRaw("customer.token_search_indexed ilike ?", [`%${search}%`])
+        .where((query) => {
+          if (templateId && templateId.length) {
+            templateId = templateId.trim()
+            query.whereRaw(
+              `customer.business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`
+            );
+          }
+        })
         .offset(page * limit)
         .limit(limit);
 
       const customersCount = await database("customer")
         .select(database.raw("COUNT(DISTINCT customer.id) AS total"))
         .where({ company_token })
-        .whereRaw("customer.token_search_indexed ilike ?", [`%${search}%`]);
+        .whereRaw("customer.token_search_indexed ilike ?", [`%${search}%`])
+        .where((query) => {
+          if (templateId && templateId.length) {
+            templateId = templateId.trim()
+            query.whereRaw(
+              `customer.business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`
+            );
+          }
+        });
 
       const pagination = {
         numRows: parseInt(customersCount[0].total),
