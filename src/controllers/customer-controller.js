@@ -7,6 +7,7 @@ const BusinessPartner = require("../models/business-partner");
 const Vehicle = require("../models/vehicle");
 const { buildCustomerDTO } = require("../lib/builder-customer-dto");
 const builderCustomer = require("../lib/builder-customer");
+const { calcExpireTime } = require('../helpers/util')
 
 const newCustomer = new Customer();
 const newEmail = new Email();
@@ -116,13 +117,16 @@ class CustomerController {
         .send({ error: "O parâmetro search é obrigatório." });
     else if (search.trim().length === 0) return res.status(204).send([]);
 
+    const templateId = req.query.template_id
+
     try {
       let customers = [];
       let customers_ids = [];
 
       customers = await newCustomer.searchCustomerByNameCpfEmailPhone(
         search,
-        companyToken
+        companyToken,
+        templateId
       );
 
       const customerListIndexed = {};
@@ -198,6 +202,8 @@ class CustomerController {
     if (req.query.page) page = parseInt(req.query.page);
     if (req.query.limit) limit = parseInt(req.query.limit);
 
+    const templateId = req.query.template_id
+
     try {
       let customers = [];
       let customers_ids = [];
@@ -206,6 +212,7 @@ class CustomerController {
         await newCustomer.searchCustomerFormattedByNameCpfEmailPhone(
           search,
           companyToken,
+          templateId,
           page,
           limit
         );
@@ -399,7 +406,19 @@ class CustomerController {
     if (req.query.page) page = parseInt(req.query.page);
     if (req.query.limit) limit = parseInt(req.query.limit);
 
+    const cacheKey = `${companyToken}:${templateId}:${page}:${limit}`
+
     try {
+      if (global.cache.customerList[cacheKey]) {
+        const customerListCached = global.cache.customerList[cacheKey]
+        if (customerListCached && customerListCached.expire && calcExpireTime(new Date(), customerListCached.expire) < global.cache.default_expire) {
+          console.log('CUSTOMER_LIST_CACHED')
+          return res.status(200).send(customerListCached.data);
+        } else {
+          global.cache.customerList[cacheKey] = null
+        }
+      }
+
       let listCustomers = [];
       let { customers, pagination } = await newCustomer.getAllByCompany(
         companyToken,
@@ -457,6 +476,9 @@ class CustomerController {
 
         listCustomers.push(customer);
       }
+
+      global.cache.customerList[cacheKey] = { data: { customers: listCustomers, pagination }, expire: new Date() }
+      console.log('CUSTOMER_LIST_STORED')
 
       return res.status(200).send({ customers: listCustomers, pagination });
     } catch (err) {
