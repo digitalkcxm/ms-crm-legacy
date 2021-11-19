@@ -1,7 +1,7 @@
 const Queue = require("bull");
 const redis = require("redis");
 
-const environment = process.env.NODE_ENV | process.env.STATE_ENV
+const environment = (process.env.NODE_ENV) ? process.env.NODE_ENV : process.env.STATE_ENV
 
 const redisPort = environment === 'testing' ? process.env.REDIS_PORT_TEST : process.env.REDIS_PORT
 const redisHost = environment === 'testing' ? process.env.REDIS_HOST_TEST : process.env.REDIS_HOST
