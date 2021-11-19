@@ -6,6 +6,8 @@ const environment = process.env.NODE_ENV | process.env.STATE_ENV
 const redisPort = environment === 'testing' ? process.env.REDIS_PORT_TEST : process.env.REDIS_PORT
 const redisHost = environment === 'testing' ? process.env.REDIS_HOST_TEST : process.env.REDIS_HOST
 
+console.log("Redis data:", redisPort, redisHost, environment)
+
 const redisClient = redis.createClient({
   port: redisPort,
   host: redisHost,
