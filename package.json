@@ -9,9 +9,9 @@
     "migrate:latest": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
     "seed:run": "./node_modules/.bin/run.env ./node_modules/.bin/knex seed:run",
     "migrate:rollback": "./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback",
-    "migrate:reset": "cross-env NODE_ENV=test ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback --all && ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
-    "pretest": "cross-env NODE_ENV=test npm run migrate:reset",
-    "test": "cross-env NODE_ENV=test ./node_modules/.bin/run.env jest --detectOpenHandles --forceExit",
+    "migrate:reset": "cross-env NODE_ENV=testing ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:rollback --all && ./node_modules/.bin/run.env ./node_modules/.bin/knex migrate:latest",
+    "pretest": "cross-env NODE_ENV=testing npm run migrate:reset",
+    "test": "cross-env NODE_ENV=testing ./node_modules/.bin/run.env jest --detectOpenHandles --forceExit",
     "clear_test": "jest --clearCache"
   },
   "author": "Silas Silva <silas.silva@digitalk.com.br>",
