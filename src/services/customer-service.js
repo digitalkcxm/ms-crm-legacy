@@ -363,7 +363,7 @@ async function schedulePersist(
       const persistQueue = new Queue(
         `persist-customer-business-${businessId}`,
         {
-          redis: { port: process.env.REDIS_PORT, host: process.env.REDIS_HOST },
+          redis: { port: redisPort, host: redisHost },
         }
       );
       persistQueue.add({
