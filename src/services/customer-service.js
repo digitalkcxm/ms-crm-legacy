@@ -8,7 +8,10 @@ const redisHost = environment === 'testing' ? process.env.REDIS_HOST_TEST : proc
 
 console.log("Redis data:", redisPort, redisHost, environment)
 
-const redisClient = redis.createClient(6379, redisHost);
+const redisClient = redis.createClient({
+  port: 6379,
+  host: redisHost,
+});
 
 
 const builderCustomer = require("../lib/builder-customer");
