@@ -34,7 +34,7 @@ global.cache = {
 }
 
 const port = process.env.PORT || 4000
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'testing') {
   app.listen(port, () => {
     console.log(`API is live on port ${port}`)
   })
