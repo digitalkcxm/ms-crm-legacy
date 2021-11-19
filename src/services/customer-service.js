@@ -1,7 +1,7 @@
 const Queue = require("bull");
 const redis = require("redis");
 
-const environment = process.env.NODE_ENV | process.env.STATE_ENV
+const environment = process.env.NODE_ENV || process.env.STATE_ENV
 
 const redisPort = environment === 'testing' ? process.env.REDIS_PORT_TEST : process.env.REDIS_PORT
 const redisHost = environment === 'testing' ? process.env.REDIS_HOST_TEST : process.env.REDIS_HOST
@@ -10,6 +10,7 @@ const redisClient = redis.createClient({
   port: redisPort,
   host: redisHost,
 });
+
 
 const builderCustomer = require("../lib/builder-customer");
 const Customer = require("../models/customer");
@@ -360,7 +361,7 @@ async function schedulePersist(
       const persistQueue = new Queue(
         `persist-customer-business-${businessId}`,
         {
-          redis: { port: process.env.REDIS_PORT, host: process.env.REDIS_HOST },
+          redis: { port: redisPort, host: redisHost },
         }
       );
       persistQueue.add({

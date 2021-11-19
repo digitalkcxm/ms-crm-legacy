@@ -1,9 +1,29 @@
 stages:
+  - test
   - homol
   - check_homol
   - release
   - prod
   - check_prod
+
+integration:
+  stage: test
+  image: node:10.16.0
+  services:
+    - redis:latest
+    - postgres:latest
+  variables:
+    POSTGRES_DB: nice_marmot
+    POSTGRES_USER: runner
+    POSTGRES_PASSWORD: "root"
+    POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+   - mv .env.test .env
+   - CI=true npm install
+   - CI=true npm run clear_test
+   - CI=true npm run test
+  only:
+   - master
 
 deploy_homol:
   stage: homol
