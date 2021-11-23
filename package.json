@@ -41,6 +41,7 @@
     "jest-serial-runner": "^1.1.0",
     "klaw-sync": "^6.0.0",
     "micromatch": "^4.0.2",
+    "mock-knex": "^0.4.10",
     "nodemon": "^1.19.1",
     "supertest": "^4.0.2"
   }

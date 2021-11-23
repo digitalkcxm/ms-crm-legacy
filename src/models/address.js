@@ -1,108 +1,132 @@
-const database = require('../config/database/database')
+const database = require("../config/database/database");
 
-const maxQueryParams = 32767
+const maxQueryParams = 32767;
 class Address {
-  async createOrUpdate (customerId, newAddress) {
+  async createOrUpdate(customerId, newAddress) {
     try {
-      const address = await this.getByStreetAndCep(customerId, newAddress.street, newAddress.cep)
+      const address = await this.getByStreetAndCep(
+        customerId,
+        newAddress.street,
+        newAddress.cep
+      );
       if (address) {
-        await this.update(customerId, address.id, newAddress)
+        await this.update(customerId, address.id, newAddress);
       } else {
-        await this.create(customerId, newAddress)
+        await this.create(customerId, newAddress);
       }
     } catch (err) {
-      console.error(err)
-      return err
+      console.error(err);
+      return err;
     }
   }
 
-  async create (customerId, newAddress) {
+  async create(customerId, newAddress) {
     try {
-      newAddress.id_customer = customerId
-      await database('address')
-        .insert(newAddress)
+      newAddress.id_customer = customerId;
+      await database("address").insert(newAddress);
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async update (customerId, addressId, address) {
+  async update(customerId, addressId, address) {
     try {
-      const result = await database('address')
-        .update(address, ['id', 'street', 'city', 'cep', 'state', 'district', 'type', 'created_at', 'updated_at'])
-        .where({ id_customer: customerId, id: addressId })
-        
-      return result[0]
+      const result = await database("address")
+        .update(address, [
+          "id",
+          "street",
+          "city",
+          "cep",
+          "state",
+          "district",
+          "type",
+          "created_at",
+          "updated_at",
+        ])
+        .where({ id_customer: customerId, id: addressId });
+
+      return result[0];
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async getByStreetAndCep (customerId, street, cep) {
+  async getByStreetAndCep(customerId, street, cep) {
     try {
-      const address = await database('address')
-        .select(['id'])
-        .where({ id_customer: customerId, street, cep })
-      if (address && address.length > 0) return address[0]
-      return null
+      const address = await database("address")
+        .select(["id"])
+        .where({ id_customer: customerId, street, cep });
+      if (address && address.length > 0) return address[0];
+      return null;
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async getById (addressId = 0, customerId = 0) {
+  async getById(addressId = 0, customerId = 0) {
     try {
-      const address = await database('address')
-        .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type'])
-        .where({ id: addressId, id_customer: customerId })
-      if (address && address.length > 0) return address[0]
-      return null
+      const address = await database("address")
+        .select(["id", "street", "city", "cep", "state", "district", "type"])
+        .where({ id: addressId, id_customer: customerId });
+      if (address && address.length > 0) return address[0];
+      return null;
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async getAllByCustomer (customerId) {
+  async getAllByCustomer(customerId) {
     try {
-      const addressList = await database('address')
-        .select(['id', 'street', 'city', 'cep', 'state', 'district', 'type'])
+      const addressList = await database("address")
+        .select(["id", "street", "city", "cep", "state", "district", "type"])
         .where({ id_customer: customerId })
-        .orderBy('updated_at', 'desc')
-      
-      return addressList
+        .orderBy("updated_at", "desc");
+
+      return addressList;
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async persistBatch (addressList = []) {
-    if (addressList.length <= 0) return []
+  async persistBatch(addressList = []) {
+    if (addressList.length <= 0) return [];
 
-    const maxAddressByInsert = Math.floor(maxQueryParams / 10)
+    const maxAddressByInsert = Math.floor(maxQueryParams / 10);
 
     try {
-      const lastIndexAddressList = addressList.length - 1
-      let chunkAddressList = []
-      let numAddress = 0
+      const lastIndexAddressList = addressList.length - 1;
+      let chunkAddressList = [];
+      let numAddress = 0;
       for (let indexAddress in addressList) {
-        const address = addressList[indexAddress]
-        chunkAddressList.push(address)
+        const address = addressList[indexAddress];
+        chunkAddressList.push(address);
 
-        if (numAddress === maxAddressByInsert || indexAddress == lastIndexAddressList) {
-          await database('address').insert(chunkAddressList)
+        if (
+          numAddress === maxAddressByInsert ||
+          indexAddress == lastIndexAddressList
+        ) {
+          await database("address").insert(chunkAddressList);
 
-          chunkAddressList = []
-          numAddress = 0
+          chunkAddressList = [];
+          numAddress = 0;
         }
 
-        numAddress += 1
+        numAddress += 1;
       }
-      
     } catch (err) {
-      console.error(err)
-      return err
+      console.error(err);
+      return err;
+    }
+  }
+
+  async deleteByCustomerIdList(customerIdList = []) {
+    try {
+      await database("address").whereIn("id_customer", customerIdList).del();
+    } catch (err) {
+      console.error(err);
+      return err;
     }
   }
 }
 
-module.exports = Address
+module.exports = Address;
