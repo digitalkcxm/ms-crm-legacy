@@ -1,16 +1,21 @@
 const Queue = require("bull");
 const redis = require("redis");
 
-const environment = process.env.NODE_ENV || process.env.STATE_ENV
+const environment = process.env.NODE_ENV || process.env.STATE_ENV;
 
-const redisPort = environment === 'testing' ? process.env.REDIS_PORT_TEST : process.env.REDIS_PORT
-const redisHost = environment === 'testing' ? process.env.REDIS_HOST_TEST : process.env.REDIS_HOST
+const redisPort =
+  environment === "testing"
+    ? process.env.REDIS_PORT_TEST
+    : process.env.REDIS_PORT;
+const redisHost =
+  environment === "testing"
+    ? process.env.REDIS_HOST_TEST
+    : process.env.REDIS_HOST;
 
 const redisClient = redis.createClient({
   port: redisPort,
   host: redisHost,
 });
-
 
 const builderCustomer = require("../lib/builder-customer");
 const Customer = require("../models/customer");
@@ -22,6 +27,7 @@ const BusinessPartner = require("../models/business-partner");
 const {
   sendNotificationStorageCompleted,
 } = require("../services/business-service");
+const { AggregateModeType } = require("../models/aggregate-mode-enum");
 
 const newCustomer = new Customer();
 const newEmail = new Email();
@@ -225,7 +231,8 @@ function setCustomerIdOnBusinessPartnerList(customer = {}, customerId = 0) {
 async function organizeAdditionalInformationCustomer(
   customers = [],
   customerIdList = [],
-  companyToken = ""
+  companyToken = "",
+  aggregateMode = AggregateModeType.INCREMENT
 ) {
   const addressList = [];
   const emailList = [];
@@ -255,6 +262,15 @@ async function organizeAdditionalInformationCustomer(
       customerId
     );
     businessPartnerList.push(...customerBusinessPartnerList);
+  }
+
+  if (aggregateMode === AggregateModeType.REPLACE) {
+    const customerIds = customerIdList.map((c) => c.id);
+    await newAddress.deleteByCustomerIdList(customerIds);
+    await newEmail.deleteByCustomerIdList(customerIds);
+    await newPhone.deleteByCustomerIdList(customerIds);
+    await newVehicle.deleteByCustomerIdList(customerIds);
+    await newBusinessPartner.deleteByCustomerIdList(customerIds);
   }
 
   if (addressList.length) {
@@ -320,7 +336,8 @@ async function updateExistCustomerList(
   customers = [],
   businessId = "",
   businessTemplateId = "",
-  companyToken
+  companyToken,
+  aggregateMode = AggregateModeType.INCREMENT
 ) {
   let customerIdList = [];
 
@@ -333,7 +350,8 @@ async function updateExistCustomerList(
   await organizeAdditionalInformationCustomer(
     customers,
     customerIdList,
-    companyToken
+    companyToken,
+    aggregateMode
   );
 
   return customerIdList;
@@ -345,6 +363,7 @@ async function schedulePersist(
   businessId,
   businessTemplateId,
   listKeyFields,
+  aggregateMode = AggregateModeType.INCREMENT,
   prefixIndexElastic
 ) {
   let customers = [];
@@ -370,6 +389,7 @@ async function schedulePersist(
         listKeyFields,
         businessId,
         businessTemplateId,
+        aggregateMode,
       });
 
       processQueue(persistQueue);
@@ -394,7 +414,8 @@ async function schedulePersist(
         customersSeparated.customerUpdate,
         businessId,
         businessTemplateId,
-        companyToken
+        companyToken,
+        aggregateMode
       );
 
       if (businessId.length)
@@ -422,6 +443,7 @@ function processQueue(queue) {
       listKeyFields,
       businessId,
       businessTemplateId,
+      aggregateMode,
     } = job.data;
 
     const customersSeparated = await separateBetweenUpdateOrCreate(
@@ -441,7 +463,8 @@ function processQueue(queue) {
       customersSeparated.customerUpdate,
       businessId,
       businessTemplateId,
-      companyToken
+      companyToken,
+      aggregateMode
     );
 
     done(null, { businessId, companyToken });

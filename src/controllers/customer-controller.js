@@ -7,7 +7,7 @@ const BusinessPartner = require("../models/business-partner");
 const Vehicle = require("../models/vehicle");
 const { buildCustomerDTO } = require("../lib/builder-customer-dto");
 const builderCustomer = require("../lib/builder-customer");
-const { calcExpireTime } = require('../helpers/util')
+const { calcExpireTime } = require("../helpers/util");
 
 const newCustomer = new Customer();
 const newEmail = new Email();
@@ -23,6 +23,9 @@ class CustomerController {
     const businessTemplateId = req.body.business_template_id;
     const listKeyFields = req.body.field_key_list;
     const prefixIndexElastic = req.body.prefix_index_elastic;
+    const aggregateMode = req.body.aggregate_mode
+      ? req.body.aggregate_mode
+      : "increment";
 
     const companyToken = req.headers["token"];
 
@@ -36,6 +39,7 @@ class CustomerController {
         [businessId],
         [businessTemplateId],
         listKeyFields,
+        aggregateMode,
         prefixIndexElastic
       );
       const resultBody = req.body;
@@ -117,7 +121,7 @@ class CustomerController {
         .send({ error: "O parâmetro search é obrigatório." });
     else if (search.trim().length === 0) return res.status(204).send([]);
 
-    const templateId = req.query.template_id
+    const templateId = req.query.template_id;
 
     try {
       let customers = [];
@@ -202,7 +206,7 @@ class CustomerController {
     if (req.query.page) page = parseInt(req.query.page);
     if (req.query.limit) limit = parseInt(req.query.limit);
 
-    const templateId = req.query.template_id
+    const templateId = req.query.template_id;
 
     try {
       let customers = [];
@@ -406,16 +410,21 @@ class CustomerController {
     if (req.query.page) page = parseInt(req.query.page);
     if (req.query.limit) limit = parseInt(req.query.limit);
 
-    const cacheKey = `${companyToken}:${templateId}:${page}:${limit}`
+    const cacheKey = `${companyToken}:${templateId}:${page}:${limit}`;
 
     try {
       if (global.cache.customerList[cacheKey]) {
-        const customerListCached = global.cache.customerList[cacheKey]
-        if (customerListCached && customerListCached.expire && calcExpireTime(new Date(), customerListCached.expire) < global.cache.default_expire) {
-          console.log('CUSTOMER_LIST_CACHED')
+        const customerListCached = global.cache.customerList[cacheKey];
+        if (
+          customerListCached &&
+          customerListCached.expire &&
+          calcExpireTime(new Date(), customerListCached.expire) <
+            global.cache.default_expire
+        ) {
+          console.log("CUSTOMER_LIST_CACHED");
           return res.status(200).send(customerListCached.data);
         } else {
-          global.cache.customerList[cacheKey] = null
+          global.cache.customerList[cacheKey] = null;
         }
       }
 
@@ -477,8 +486,11 @@ class CustomerController {
         listCustomers.push(customer);
       }
 
-      global.cache.customerList[cacheKey] = { data: { customers: listCustomers, pagination }, expire: new Date() }
-      console.log('CUSTOMER_LIST_STORED')
+      global.cache.customerList[cacheKey] = {
+        data: { customers: listCustomers, pagination },
+        expire: new Date(),
+      };
+      console.log("CUSTOMER_LIST_STORED");
 
       return res.status(200).send({ customers: listCustomers, pagination });
     } catch (err) {

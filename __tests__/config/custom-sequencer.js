@@ -1,31 +1,33 @@
-const TestSequencer = require('@jest/test-sequencer').default;
+const TestSequencer = require("@jest/test-sequencer").default;
 
 class CustomSequencer extends TestSequencer {
-    sort(tests) {
-        const orderPath = [
-            'health',
-            'customer',
-            'email',
-            'phone',
-            'address',
-            'vehicle',
-            'businesspartner'
-        ];
-        return tests.sort((testA, testB) => {
-            let filenameA = testA.path.split('/')
-            filenameA = filenameA[filenameA.length - 1]
-            let filenameB = testB.path.split('/')
-            filenameB = filenameB[filenameB.length - 1]
-            const indexA = orderPath.indexOf(filenameA.split('-')[0]);
-            const indexB = orderPath.indexOf(filenameB.split('-')[0]);
+  sort(tests) {
+    const orderPath = [
+      "health-router.test.js",
+      "customer-router.test.js",
+      "email-router.test.js",
+      "phone-router.test.js",
+      "address-router.test.js",
+      "vehicle-router.test.js",
+      "businesspartner-router.test.js",
+      //   "email.test.js",
+    ];
+    const testsInOrder = [];
+    const copyTests = Array.from(tests);
 
-            if (indexA === indexB) return 0; // do not swap when tests both not specify in order.
+    for (let i = 0; i < orderPath.length; i++) {
+      for (let j = 0; j < copyTests.length; j++) {
+        const testSplit = copyTests[j].path.split("/");
+        const testFile = testSplit[testSplit.length - 1];
 
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-            return indexA < indexB ? -1 : 1;
-        })
+        if (testFile === orderPath[i]) {
+          testsInOrder.push(copyTests[j]);
+        }
+      }
     }
+
+    return testsInOrder;
+  }
 }
 
 module.exports = CustomSequencer;

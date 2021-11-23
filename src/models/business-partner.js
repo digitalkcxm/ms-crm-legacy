@@ -1,110 +1,154 @@
-const database = require('../config/database/database')
-const moment = require('moment')
+const database = require("../config/database/database");
+const moment = require("moment");
 
-const maxQueryParams = 32767
+const maxQueryParams = 32767;
 class BusinessPartner {
-  async createOrUpdate (customerId, newBusinessPartner) {
+  async createOrUpdate(customerId, newBusinessPartner) {
     try {
-      const businessPartner = await this.getByCnpj(customerId, newBusinessPartner.cnpj)
+      const businessPartner = await this.getByCnpj(
+        customerId,
+        newBusinessPartner.cnpj
+      );
       if (businessPartner) {
-        this.update(customerId, businessPartner.id, newBusinessPartner)
+        this.update(customerId, businessPartner.id, newBusinessPartner);
       } else {
-        this.create(customerId, newBusinessPartner)
+        this.create(customerId, newBusinessPartner);
       }
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async update (customerId, businessPartnerId, data) {
+  async update(customerId, businessPartnerId, data) {
     try {
-      const result = await database('business_partner')
-        .update(data, ['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
-        .where({ id_customer: customerId, id: businessPartnerId })
+      const result = await database("business_partner")
+        .update(data, [
+          "id",
+          "fantasy_name",
+          "cnpj",
+          "status",
+          "foundation_date",
+          "created_at",
+          "updated_at",
+        ])
+        .where({ id_customer: customerId, id: businessPartnerId });
 
-      result[0].foundation_date = moment(result[0].foundation_date).format('DD/MM/YYYY')
+      result[0].foundation_date = moment(result[0].foundation_date).format(
+        "DD/MM/YYYY"
+      );
 
-      return result[0]
+      return result[0];
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async create (customerId, data) {
+  async create(customerId, data) {
     try {
-      data.id_customer = customerId
-      businessPartnerId = await database('business_partner')
-        .insert(data)
+      data.id_customer = customerId;
+      businessPartnerId = await database("business_partner").insert(data);
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async getByCnpj (customerId, cnpj) {
+  async getByCnpj(customerId, cnpj) {
     try {
-      const businessPartner = await database('business_partner')
-        .select(['id'])
-        .where({ id_customer: customerId, cnpj })
-      if (businessPartner && businessPartner.length > 0) return businessPartner[0]
-      return null
+      const businessPartner = await database("business_partner")
+        .select(["id"])
+        .where({ id_customer: customerId, cnpj });
+      if (businessPartner && businessPartner.length > 0)
+        return businessPartner[0];
+      return null;
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async getById (bpId = 0, customerId = 0) {
+  async getById(bpId = 0, customerId = 0) {
     try {
-      const businessPartner = await database('business_partner')
-        .select(['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
-        .where({ id: bpId, id_customer: customerId })
-      if (businessPartner && businessPartner.length > 0) return businessPartner[0]
-      return null
+      const businessPartner = await database("business_partner")
+        .select([
+          "id",
+          "fantasy_name",
+          "cnpj",
+          "status",
+          "foundation_date",
+          "created_at",
+          "updated_at",
+        ])
+        .where({ id: bpId, id_customer: customerId });
+      if (businessPartner && businessPartner.length > 0)
+        return businessPartner[0];
+      return null;
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async getAllByCustomer (customerId) {
+  async getAllByCustomer(customerId) {
     try {
-      const businessPartnerList = await database('business_partner')
-        .select(['id', 'fantasy_name', 'cnpj', 'status', 'foundation_date', 'created_at', 'updated_at'])
+      const businessPartnerList = await database("business_partner")
+        .select([
+          "id",
+          "fantasy_name",
+          "cnpj",
+          "status",
+          "foundation_date",
+          "created_at",
+          "updated_at",
+        ])
         .where({ id_customer: customerId })
-        .orderBy('updated_at', 'desc')
+        .orderBy("updated_at", "desc");
 
-      return businessPartnerList
+      return businessPartnerList;
     } catch (err) {
-      return err
+      return err;
     }
   }
 
-  async persistBatch (businessPartnerList = []) {
-    if (businessPartnerList.length <= 0) return []
-    
-    const maxBusinessPartnerByInsert = Math.floor(maxQueryParams / 10)
+  async persistBatch(businessPartnerList = []) {
+    if (businessPartnerList.length <= 0) return [];
+
+    const maxBusinessPartnerByInsert = Math.floor(maxQueryParams / 10);
 
     try {
-      const lastIndexBusinessPartnerList = businessPartnerList.length - 1
-      let chunkBusinessPartnerList = []
-      let numBusinessPartner = 0
+      const lastIndexBusinessPartnerList = businessPartnerList.length - 1;
+      let chunkBusinessPartnerList = [];
+      let numBusinessPartner = 0;
 
       for (let indexBusinessPartner in businessPartnerList) {
-        const bp = businessPartnerList[indexBusinessPartner]
-        chunkBusinessPartnerList.push(bp)
+        const bp = businessPartnerList[indexBusinessPartner];
+        chunkBusinessPartnerList.push(bp);
 
-        if (numBusinessPartner === maxBusinessPartnerByInsert || indexBusinessPartner == lastIndexBusinessPartnerList) {
-          await database('business_partner').insert(chunkBusinessPartnerList)
-          
-          chunkBusinessPartnerList = []
-          numBusinessPartner = 0
+        if (
+          numBusinessPartner === maxBusinessPartnerByInsert ||
+          indexBusinessPartner == lastIndexBusinessPartnerList
+        ) {
+          await database("business_partner").insert(chunkBusinessPartnerList);
+
+          chunkBusinessPartnerList = [];
+          numBusinessPartner = 0;
         }
 
-        numBusinessPartner += 1
+        numBusinessPartner += 1;
       }
     } catch (err) {
-      console.error(err)
-      return err
+      console.error(err);
+      return err;
+    }
+  }
+
+  async deleteByCustomerIdList(customerIdList = []) {
+    try {
+      await database("business_partner")
+        .whereIn("id_customer", customerIdList)
+        .del();
+    } catch (err) {
+      console.error(err);
+      return err;
     }
   }
 }
 
-module.exports = BusinessPartner
+module.exports = BusinessPartner;
