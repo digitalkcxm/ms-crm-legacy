@@ -179,7 +179,7 @@ class Customer {
 
         console.time('count')
         const customersCount = await database("customer")
-          .select(database.raw("count(*) as total"))
+          .select(database.raw("count(id) as total"))
           .where({ company_token })
           .where((builder) => {
             if (templateId && templateId.length)
