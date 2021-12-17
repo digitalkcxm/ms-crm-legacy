@@ -11,6 +11,10 @@ function buildCustomer(data, companyToken) {
     company_token: companyToken,
   };
 
+  if (Array.isArray(data) && data.length > 1) {
+    data = data[0]
+  }
+
   if (data.customer_name) dataCustomer.customer.name = data.customer_name;
   if (data.customer_cpfcnpj)
     dataCustomer.customer.cpfcnpj = data.customer_cpfcnpj;
@@ -74,6 +78,8 @@ function buildCustomer(data, companyToken) {
   }
   dataCustomer.address = address;
 
+  
+
   let email = [];
   if (data.customer_email && Array.isArray(data.customer_email)) {
     data.customer_email.filter(e => e.customer_email).forEach((e) => {
@@ -98,6 +104,8 @@ function buildCustomer(data, companyToken) {
     }
   }
   dataCustomer.email = email;
+
+  
 
   let phone = [];
   if (data.customer_phone && Array.isArray(data.customer_phone)) {
