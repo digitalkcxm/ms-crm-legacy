@@ -456,20 +456,24 @@ class Customer {
 
       let queryInsertValues = [];
       let customerBindingValues = {};
-
+      
       for (let indexCustomer in customers) {
         let customerValues = [];
         const customer = customers[indexCustomer];
+        
+        for (let indexField in tableFields) {
+          const tf = tableFields[indexField]
 
-        tableFields.forEach((tf) => {
+          const customerFieldValue = customer[tf]
+          
           customerValues.push(`:${tf}${indexCustomer}`);
-          customerBindingValues[`${tf}${indexCustomer}`] = customer[tf];
+          customerBindingValues[`${tf}${indexCustomer}`] = customerFieldValue
 
           if (tf === "business_list" || tf === "business_template_list")
             customerBindingValues[`${tf}${indexCustomer}`] = JSON.stringify(
               customerBindingValues[`${tf}${indexCustomer}`]
             );
-        });
+        }
 
         const value = `(${customerValues.join(",")})`;
         queryInsertValues.push(value);

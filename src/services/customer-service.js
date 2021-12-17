@@ -318,6 +318,7 @@ async function persistNewCustomerList(
     c.customer.business_template_list = businessTemplateId;
     return c.customer;
   });
+  
   customerIdList = await newCustomer.createBatch(customerList);
   customers.forEach((c, cIndex) => {
     c.customer.id = customerIdList[cIndex].id;
@@ -371,7 +372,7 @@ async function schedulePersist(
     let customer = builderCustomer.buildCustomer(data, companyToken);
     customers.push(customer);
   });
-
+  
   try {
     let newCustomerIdList = [];
     let updatedCustomerIdList = [];
