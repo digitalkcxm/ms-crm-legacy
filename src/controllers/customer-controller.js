@@ -42,7 +42,7 @@ class CustomerController {
       const resultBody = req.body
       resultBody.contact_ids = resultPersistCustomers
 
-      await this._invalidCustomerCache(companyToken)
+      await this._invalidateCustomerCache(companyToken)
 
       res.status(201).send(resultBody)
     } catch (err) {
@@ -51,7 +51,7 @@ class CustomerController {
     }
   }
 
-  async _invalidCustomerCache(companyToken = '') {
+  async _invalidateCustomerCache(companyToken = '') {
     const prefixCacheKey = `${companyToken}`
 
     const customerCacheKeys = Object.keys(global.cache.customerList)
@@ -103,7 +103,7 @@ class CustomerController {
 
       result.customer_id = customerId
 
-      await this._invalidCustomerCache(companyToken)
+      await this._invalidateCustomerCache(companyToken)
 
       res.status(201).send(result)
     } catch (err) {
@@ -380,8 +380,8 @@ class CustomerController {
           customerListCached.expire &&
           calcExpireTime(new Date(), customerListCached.expire) < global.cache.default_expire
         ) {
-          console.log('CUSTOMER_LIST_CACHED')
-          return res.status(200).send(customerListCached.data)
+          // console.log('CUSTOMER_LIST_CACHED')
+          // return res.status(200).send(customerListCached.data)
         } else {
           global.cache.customerList[cacheKey] = null
         }
