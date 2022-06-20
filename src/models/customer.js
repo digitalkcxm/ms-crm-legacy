@@ -418,7 +418,7 @@ class Customer {
         for (let indexField in tableFields) {
           const tf = tableFields[indexField]
 
-          const customerFieldValue = customer[tf]
+          const customerFieldValue = (customer[tf]) ? customer[tf] : ''
 
           customerValues.push(`:${tf}${indexCustomer}`)
           customerBindingValues[`${tf}${indexCustomer}`] = customerFieldValue
