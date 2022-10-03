@@ -286,7 +286,7 @@ class Customer {
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw(`customer.business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`)
+            query.whereRaw(`customer.business_template_list::text ilike '%${templateId}%'`)
           }
         })
 
@@ -310,7 +310,7 @@ class Customer {
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw(`customer.business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`)
+            query.whereRaw(`customer.business_template_list::text ilike '%${templateId}%'`)
           }
         })
         .offset(page * limit)
@@ -323,7 +323,7 @@ class Customer {
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw(`customer.business_template_list::jsonb @> to_json(ARRAY['${templateId}'])::jsonb`)
+            query.whereRaw(`customer.business_template_list::text ilike '%${templateId}%'`)
           }
         })
 
@@ -418,7 +418,7 @@ class Customer {
         for (let indexField in tableFields) {
           const tf = tableFields[indexField]
 
-          let customerFieldValue = (customer[tf]) ? customer[tf] : ''
+          let customerFieldValue = customer[tf] ? customer[tf] : ''
           if (tf === 'deceased' && !customer[tf]) {
             customerFieldValue = false
           }
