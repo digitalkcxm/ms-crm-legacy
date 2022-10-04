@@ -117,7 +117,8 @@ class CustomerController {
 
     const { search } = req.query
     if (!Object.keys(req.query).includes('search')) return res.status(400).send({ error: 'O parâmetro search é obrigatório.' })
-    else if (search.trim().length === 0) return res.status(204).send([])
+    else if (search.trim().length <= 5)
+      return res.status(400).send({ warn: 'Para realizar a pesquisa é necessário informar ao menos 5 caracteres' })
 
     const templateId = req.query.template_id
 
