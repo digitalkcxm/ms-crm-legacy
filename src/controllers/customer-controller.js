@@ -8,6 +8,7 @@ const Vehicle = require('../models/vehicle')
 const { buildCustomerDTO } = require('../lib/builder-customer-dto')
 const builderCustomer = require('../lib/builder-customer')
 const { calcExpireTime } = require('../helpers/util')
+const { AggregateModeType } = require('../models/aggregate-mode-enum')
 
 const newCustomer = new Customer()
 const newEmail = new Email()
@@ -449,7 +450,6 @@ class CustomerController {
 
   async update(req, res) {
     const companyToken = req.headers['token']
-    const prefixIndexElastic = req.headers['prefix-index-elastic']
 
     const customerId = req.params.id
     if (!customerId) return res.status(400).send({ error: 'O ID do customer é obrigatório' })
@@ -469,7 +469,12 @@ class CustomerController {
       customers[0].customer.business_list = customer.business_list
       customers[0].customer.business_template_list = customer.business_template_list
 
-      await customerService.updateExistCustomerList(customers, null, null, companyToken)
+      if (customerUpdate.customer_phone || customerUpdate.customer_email) {
+        await customerService.updateExistCustomerList(customers, null, null, companyToken, AggregateModeType.REPLACE)
+      } else {
+        await customerService.updateExistCustomerList(customers, null, null, companyToken)
+      }
+
 
       return res.sendStatus(204)
     } catch (err) {
