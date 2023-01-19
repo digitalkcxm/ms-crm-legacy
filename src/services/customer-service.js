@@ -1,22 +1,3 @@
-const Queue = require("bull");
-const redis = require("redis");
-
-const environment = process.env.NODE_ENV || process.env.STATE_ENV;
-
-const redisPort =
-  environment === "testing"
-    ? process.env.REDIS_PORT_TEST
-    : process.env.REDIS_PORT;
-const redisHost =
-  environment === "testing"
-    ? process.env.REDIS_HOST_TEST
-    : process.env.REDIS_HOST;
-
-const redisClient = redis.createClient({
-  port: redisPort,
-  host: redisHost,
-});
-
 const builderCustomer = require("../lib/builder-customer");
 const Customer = require("../models/customer");
 const Email = require("../models/email");
@@ -28,6 +9,7 @@ const {
   sendNotificationStorageCompleted,
 } = require("../services/business-service");
 const { AggregateModeType } = require("../models/aggregate-mode-enum");
+const { sendToQueuePersistCustomer } = require("../helpers/rabbit-helper");
 
 const newCustomer = new Customer();
 const newEmail = new Email();
@@ -318,7 +300,7 @@ async function persistNewCustomerList(
     c.customer.business_template_list = businessTemplateId;
     return c.customer;
   });
-  
+
   customerIdList = await newCustomer.createBatch(customerList);
   customers.forEach((c, cIndex) => {
     c.customer.id = customerIdList[cIndex].id;
@@ -372,29 +354,22 @@ async function schedulePersist(
     let customer = builderCustomer.buildCustomer(data, companyToken);
     customers.push(customer);
   });
-  
+
   try {
     let newCustomerIdList = [];
     let updatedCustomerIdList = [];
 
     if (isMultipleCustomers(customers)) {
-      const persistQueue = new Queue(
-        `persist-customer-business-${businessId}`,
-        {
-          redis: { port: redisPort, host: redisHost },
-        }
-      );
-      persistQueue.add({
+      const msg = {
         customers,
         companyToken,
         listKeyFields,
         businessId,
         businessTemplateId,
         aggregateMode,
-      });
+      }
 
-      processQueue(persistQueue);
-      notifyProcessCompleted(persistQueue);
+      sendToQueuePersistCustomer(msg)
 
       return [];
     } else {
@@ -436,40 +411,67 @@ function isMultipleCustomers(customers = []) {
   return customers.length > 1;
 }
 
+async function processCustomer(conn = {}) {
+  conn.createChannel((err, ch) => {
+    if (err) console.log('Erro ao criar fila => ', err)
+
+    const queueName = `mscrm:persist_customer`
+
+    ch.assertQueue(queueName, { durable: true })
+    ch.prefetch(1)
+    ch.consume(
+      queueName,
+      (msg) => {
+        const obj = JSON.parse(msg.content.toString())
+        processCustomerData(obj).then(() => {
+          ch.ack(msg, false)
+        })
+      },
+      { noAck: false }
+    )
+  })
+}
+
 function processQueue(queue) {
   queue.process(async (job, done) => {
-    const {
-      customers,
-      companyToken,
-      listKeyFields,
-      businessId,
-      businessTemplateId,
-      aggregateMode,
-    } = job.data;
+    await processCustomerData(job.data)
 
-    const customersSeparated = await separateBetweenUpdateOrCreate(
-      customers,
-      companyToken,
-      translateFields(listKeyFields),
-      businessId,
-      businessTemplateId
-    );
-    await persistNewCustomerList(
-      customersSeparated.customerCreate,
-      businessId,
-      businessTemplateId,
-      companyToken
-    );
-    await updateExistCustomerList(
-      customersSeparated.customerUpdate,
-      businessId,
-      businessTemplateId,
-      companyToken,
-      aggregateMode
-    );
+    const { businessId, companyToken } = job.data
 
     done(null, { businessId, companyToken });
   });
+}
+
+async function processCustomerData(data = {}) {
+  const {
+    customers,
+    companyToken,
+    listKeyFields,
+    businessId,
+    businessTemplateId,
+    aggregateMode,
+  } = data;
+
+  const customersSeparated = await separateBetweenUpdateOrCreate(
+    customers,
+    companyToken,
+    translateFields(listKeyFields),
+    businessId,
+    businessTemplateId
+  );
+  await persistNewCustomerList(
+    customersSeparated.customerCreate,
+    businessId,
+    businessTemplateId,
+    companyToken
+  );
+  await updateExistCustomerList(
+    customersSeparated.customerUpdate,
+    businessId,
+    businessTemplateId,
+    companyToken,
+    aggregateMode
+  );
 }
 
 function notifyProcessCompleted(queue) {
@@ -479,34 +481,8 @@ function notifyProcessCompleted(queue) {
         result.businessId[0],
         result.companyToken
       );
-      await removeRedisKey(result.businessId);
     }
   });
 }
 
-async function removeRedisKey(businessId = "") {
-  if (String(businessId).length) {
-    const key = `bull:persist-customer-business-${businessId}*`;
-    return new Promise((resolve, reject) => {
-      redisClient.scan(0, "MATCH", key, (err, data) => {
-        if (err) return reject(err);
-        if (data[1]) {
-          return Promise.all(
-            data[1].map(
-              (entry) =>
-                new Promise((resolve, reject) =>
-                  redisClient.del(entry, (err, data) => {
-                    if (err) return reject(err);
-                    return resolve(data);
-                  })
-                )
-            )
-          );
-        }
-        return resolve();
-      });
-    });
-  }
-}
-
-module.exports = { schedulePersist, updateExistCustomerList };
+module.exports = { schedulePersist, updateExistCustomerList, processCustomer };
