@@ -5,7 +5,7 @@ const customerModel = new Customer()
 const phoneModel = new Phone()
 
 class PhoneController {
-  async create (req, res) {
+  async create(req, res) {
     req.assert('number', 'O número é obrigatório').notEmpty()
     req.assert('type', 'O tipo é obrigatório').notEmpty()
 
@@ -24,14 +24,14 @@ class PhoneController {
       const { number, type } = req.body
 
       await phoneModel.createOrUpdate(req.params.customerId, { number, type })
-      
+
       return res.sendStatus(201)
     } catch (err) {
       return res.status(500).send({ err: err.message })
     }
   }
 
-  async getAll (req, res) {
+  async getAll(req, res) {
     const companyToken = req.headers['company_token']
 
     let customerId = req.params.customerId
@@ -49,7 +49,7 @@ class PhoneController {
     }
   }
 
-  async update (req, res) {
+  async update(req, res) {
     req.assert('number', 'O número é obrigatório').notEmpty()
     req.assert('type', 'O tipo é obrigatório').notEmpty()
 
@@ -73,7 +73,7 @@ class PhoneController {
 
       await phoneModel.update(customerId, phoneId, { number, type })
       const phone = await phoneModel.getById(phoneId, customerId)
-      
+
       return res.status(200).send(phone)
     } catch (err) {
       return res.status(500).send({ err: err.message })
