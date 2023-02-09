@@ -311,18 +311,16 @@ async function schedulePersist(
     let updatedCustomerIdList = []
 
     if (isMultipleCustomers(customers)) {
-      for (let customer of customers) {
-        const msg = {
-          customers: [customer],
-          companyToken,
-          listKeyFields,
-          businessId,
-          businessTemplateId,
-          aggregateMode
-        }
-
-        sendToQueuePersistCustomer(msg)
+      const msg = {
+        customers: [],
+        companyToken,
+        listKeyFields,
+        businessId,
+        businessTemplateId,
+        aggregateMode
       }
+
+      sendToQueuePersistCustomer(msg, customers)
 
       return []
     } else {
