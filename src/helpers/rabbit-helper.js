@@ -1,19 +1,21 @@
 const RabbitMQ = require('../config/rabbitmq')
 
-async function sendToQueuePersistCustomer(data = {}) {
+async function sendToQueuePersistCustomer(msg = {}, customers = []) {
   if (process.env.STATE_ENV === 'testing') return true
 
   try {
     const conn = await createConn()
 
-    const channel = await createChannel(conn)
-
     const queue = 'mscrm:persist_customer'
 
-    channel.assertQueue(queue, { durable: true })
-    channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)), { persistent: true })
-
-    closeChannel(channel)
+    for (let customer of customers) {
+      const data = msg
+      data.customers.push(customer)
+      const channel = await createChannel(conn)
+      channel.assertQueue(queue, { durable: true })
+      channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)), { persistent: true })
+      closeChannel(channel)
+    }
 
     return true
   } catch (error) {
