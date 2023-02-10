@@ -10,7 +10,7 @@ async function sendToQueuePersistCustomer(msg = {}, customers = []) {
 
     for (let customer of customers) {
       const data = msg
-      data.customers.push(customer)
+      data.customers = [customer]
       const channel = await createChannel(conn)
       channel.assertQueue(queue, { durable: true })
       channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)), { persistent: true })
