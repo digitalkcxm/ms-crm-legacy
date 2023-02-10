@@ -11,10 +11,12 @@ async function sendToQueuePersistCustomer(msg = {}, customers = []) {
     for (let customer of customers) {
       const data = msg
       data.customers = [customer]
+
       const channel = await createChannel(conn)
       channel.assertQueue(queue, { durable: true })
       channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)), { persistent: true })
       closeChannel(channel)
+      console.info('message published on businessId:', msg.businessId[0], 'and companyToken:', msg.companyToken)
     }
 
     return true

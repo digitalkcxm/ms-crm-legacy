@@ -358,17 +358,19 @@ function isMultipleCustomers(customers = []) {
 
 async function processCustomer(conn = {}) {
   conn.createChannel((err, ch) => {
-    if (err) console.log('Erro ao criar fila => ', err)
+    if (err) console.error('Erro ao criar fila => ', err)
 
     const queueName = `mscrm:persist_customer`
 
     ch.assertQueue(queueName, { durable: true })
-    ch.prefetch(1)
+    ch.prefetch(2)
     ch.consume(
       queueName,
       (msg) => {
         const obj = JSON.parse(msg.content.toString())
+
         processCustomerData(obj).then(() => {
+          console.info('message consumed on businessId:', obj.businessId[0], 'and companyToken:', obj.companyToken)
           ch.ack(msg, false)
         })
       },
