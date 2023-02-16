@@ -121,6 +121,7 @@ class Customer {
           'occupation',
           'income',
           'credit_risk',
+          'responsible_user_id',
           'business_list',
           'business_template_list',
           'created_at',
@@ -141,7 +142,7 @@ class Customer {
       let pagination = {}
       if (page < 0) {
         customers = await database('customer')
-          .select(['id', 'cpfcnpj', 'name'])
+          .select(['id', 'cpfcnpj', 'name', 'responsible_user_id'])
           .where({ company_token })
           .where((builder) => {
             builder.where({ company_token })
@@ -151,7 +152,7 @@ class Customer {
       } else {
         console.time('search')
         customers = await database('customer')
-          .select(['id', 'cpfcnpj', 'name'])
+          .select(['id', 'cpfcnpj', 'name', 'responsible_user_id'])
           .where({ company_token })
           .where((builder) => {
             if (templateId && templateId.length) builder.whereRaw(`business_template_list::text ilike ?`, [`%${templateId}%`])
@@ -210,6 +211,7 @@ class Customer {
           'occupation',
           'income',
           'credit_risk',
+          'responsible_user_id',
           'business_list',
           'business_template_list'
         ])
@@ -248,12 +250,12 @@ class Customer {
           'occupation',
           'income',
           'credit_risk',
+          'responsible_user_id',
           'business_list',
           'business_template_list'
         ])
         .where({ company_token })
         .whereIn('cpfcnpj', cpfcnpjList)
-      console.log('list', cpfcnpjList)
       const customersFormatted = customers.map((customer) => {
         let businessList = []
         let businessTemplateList = []
@@ -278,7 +280,7 @@ class Customer {
       const customers = await database('customer')
         .select(
           database.raw(
-            'DISTINCT ON(customer.id) customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list'
+            'DISTINCT ON(customer.id) customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
           )
         )
         .where({ company_token: company_token.trim() })
@@ -302,7 +304,7 @@ class Customer {
       const customers = await database('customer')
         .select(
           database.raw(
-            'DISTINCT ON(customer.id) customer.id, customer.name, customer.cpfcnpj, customer.business_list, customer.business_template_list'
+            'DISTINCT ON(customer.id) customer.id, customer.name, customer.cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
           )
         )
         .where({ company_token: company_token.trim() })
@@ -367,7 +369,7 @@ class Customer {
           const customerResultList = await database('customer')
             .select(
               database.raw(
-                'customer.id, cpfcnpj, name, person_type, email.email as email, phone.number as phone, cpfcnpj_status, birthdate, gender, mother_name, deceased, occupation, income, credit_risk, customer.created_at, customer.updated_at, business_list, business_template_list'
+                'customer.id, cpfcnpj, name, person_type, email.email as email, phone.number as phone, cpfcnpj_status, birthdate, gender, mother_name, deceased, occupation, income, credit_risk, customer.created_at, customer.updated_at, business_list, business_template_list, responsible_user_id'
               )
             )
             .leftJoin('email', 'email.id_customer', 'customer.id')
@@ -484,7 +486,8 @@ class Customer {
       'credit_risk',
       'company_token',
       'business_list',
-      'business_template_list'
+      'business_template_list',
+      'responsible_user_id'
     ]
 
     const maxCustomerByQuery = Math.floor(maxQueryParams / (tableFields.length + 1))
@@ -528,6 +531,7 @@ class Customer {
             company_token = c.company_token,
             business_list = c.business_list::json,
             business_template_list = c.business_template_list::json,
+            responsible_user_id = c.responsible_user_id,
             updated_at = NOW()
             FROM (VALUES ${queryUpdateValues.join(',')}) AS c(${tableFields.join(',')})
             WHERE customer.id = c.id::integer
