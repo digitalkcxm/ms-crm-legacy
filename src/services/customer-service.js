@@ -114,6 +114,7 @@ async function separateBetweenUpdateOrCreate(customers = [], companyToken = '', 
       if (!transientCustomer['income']) transientCustomer.income = customerMatch[0].income
       if (!transientCustomer['credit_risk']) transientCustomer.credit_risk = customerMatch[0].credit_risk
       if (!transientCustomer['company_token']) transientCustomer.company_token = companyToken
+      if (!transientCustomer['responsible_user_id']) transientCustomer.responsible_user_id = customerMatch[0].responsible_user_id
 
       customerIndexed.dataCustomer.customer = transientCustomer
       customerUpdate.push(customerIndexed.dataCustomer)

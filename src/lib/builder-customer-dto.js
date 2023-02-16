@@ -1,4 +1,4 @@
-function buildCustomerDTO (customer) {
+function buildCustomerDTO(customer) {
   let customerDto = {}
 
   if (customer) {
@@ -14,11 +14,12 @@ function buildCustomerDTO (customer) {
     if (customer.occupation) customerDto.customer_occupation = customer.occupation
     if (customer.income) customerDto.customer_income = customer.income
     if (customer.credit_risk) customerDto.customer_credit_risk = customer.credit_risk
+    if (customer.responsible_user_id) customerDto.customer_responsible = customer.responsible_user_id
 
     if (customer.email) {
       let listEmail = customer.email
       let listEmailFormmated = []
-      listEmail.forEach(e => {
+      listEmail.forEach((e) => {
         if (e.email) listEmailFormmated.push({ id: e.id, customer_email: e.email })
       })
       customerDto.customer_email = listEmailFormmated
@@ -27,7 +28,7 @@ function buildCustomerDTO (customer) {
     if (customer.address) {
       let listAddress = customer.address
       let listAddressFormatted = []
-      listAddress.forEach(a => {
+      listAddress.forEach((a) => {
         let address = {
           id: a.id,
           customer_address_street: a.street,
@@ -45,7 +46,7 @@ function buildCustomerDTO (customer) {
     if (customer.business_partner) {
       let listBusinessPartner = customer.business_partner
       let listBusinessPartnerFormatted = []
-      listBusinessPartner.forEach(b => {
+      listBusinessPartner.forEach((b) => {
         let business = {
           id: b.id,
           customer_business_partner_cnpj: b.cnpj,
@@ -61,7 +62,7 @@ function buildCustomerDTO (customer) {
     if (customer.phone) {
       let listPhone = customer.phone
       let listPhoneFormatted = []
-      listPhone.forEach(p => {
+      listPhone.forEach((p) => {
         let phone = {
           id: p.id,
           customer_phone_number: p.number,
@@ -75,7 +76,7 @@ function buildCustomerDTO (customer) {
     if (customer.vehicle) {
       let listVehicle = customer.vehicle
       let listVehicleFormatted = []
-      listVehicle.forEach(v => {
+      listVehicle.forEach((v) => {
         let vehicle = {
           id: v.id,
           customer_vehicle_plate: v.plate,
