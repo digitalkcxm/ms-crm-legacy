@@ -366,21 +366,23 @@ class Customer {
         chunkSearchValueList.push(searchValue)
 
         if (numSearchValue === maxSearchValue || indexSearchValue == lastIndexSearchValueList) {
+          console.log(firstSearchKeyField)
           const customerResultList = await database('customer')
             .select(
               database.raw(
-                'customer.id, cpfcnpj, name, person_type, email.email as email, phone.number as phone, cpfcnpj_status, birthdate, gender, mother_name, deceased, occupation, income, credit_risk, customer.created_at, customer.updated_at, business_list, business_template_list, responsible_user_id'
+                'customer.id, cpfcnpj, name, person_type cpfcnpj_status, birthdate, gender, mother_name, deceased, occupation, income, credit_risk, customer.created_at, customer.updated_at, business_list, business_template_list, responsible_user_id'
               )
             )
-            .leftJoin('email', 'email.id_customer', 'customer.id')
-            .leftJoin('phone', 'phone.id_customer', 'customer.id')
             .where({ company_token: companyToken })
             .andWhere((query) => {
-              query.whereIn(firstSearchKeyField, chunkSearchValueList)
-
-              otherSearchKeyFieldList.forEach((keyField) => {
-                query.orWhereIn(keyField, chunkSearchValueList)
-              })
+              if (firstSearchKeyField !== 'phone.number' && firstSearchKeyField !== 'email.email') {
+                query.whereIn(firstSearchKeyField, chunkSearchValueList)
+              } else {
+                query.whereRaw(`token_search_indexed ilike '%${chunkSearchValueList[0]}%'`)
+                for (let value of chunkSearchValueList) {
+                  query.orWhereRaw(`token_search_indexed ilike '%${value}%'`)
+                }
+              }
             })
 
           customers.push(...customerResultList)
