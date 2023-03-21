@@ -288,7 +288,7 @@ class Customer {
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw('customer.business_template_list \\? ?', `'${templateId}'`)
+            query.whereRaw('customer.business_template_list ?', ` ? '${templateId}'`)
           }
         })
 
@@ -312,7 +312,7 @@ class Customer {
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw('customer.business_template_list \\? ?', `'${templateId}'`)
+            query.whereRaw('customer.business_template_list ?', ` ? '${templateId}'`)
           }
         })
         .offset(page * limit)
@@ -325,7 +325,7 @@ class Customer {
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw('customer.business_template_list \\? ?', `'${templateId}'`)
+            query.whereRaw('customer.business_template_list ', ` ? '${templateId}'`)
           }
         })
 
