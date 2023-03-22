@@ -277,20 +277,22 @@ class Customer {
 
   async searchCustomerByNameCpfEmailPhone(search, company_token, templateId = '') {
     try {
+      console.time('searchCustomer')
       const customers = await database('customer')
         .select(
           database.raw(
-            'DISTINCT ON(customer.id) customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
+            'customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
           )
         )
-        .where({ company_token: company_token.trim() })
+        .whereRaw(`to_tsvector('simple', customer.company_token) @@ to_tsquery('simple', ?)`, [`${company_token.trim()}`])
         .whereRaw('customer.token_search_indexed ilike ?', [`%${search.trim()}%`])
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw(`customer.business_template_list::text ilike '%${templateId}%'`)
+            query.whereRaw('customer.business_template_list \\? ?', [`${templateId}`])
           }
         })
+      console.timeEnd('searchCustomer')
 
       return customers
     } catch (err) {
@@ -304,28 +306,28 @@ class Customer {
       const customers = await database('customer')
         .select(
           database.raw(
-            'DISTINCT ON(customer.id) customer.id, customer.name, customer.cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
+            'customer.id, customer.name, customer.cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
           )
         )
-        .where({ company_token: company_token.trim() })
+        .whereRaw(`to_tsvector('simple', customer.company_token) @@ to_tsquery('simple', ?)`, [`${company_token.trim()}`])
         .whereRaw('customer.token_search_indexed ilike ?', [`%${search.trim()}%`])
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw(`customer.business_template_list::text ilike '%${templateId}%'`)
+            query.whereRaw('customer.business_template_list \\? ?', [`${templateId}`])
           }
         })
         .offset(page * limit)
         .limit(limit)
 
       const customersCount = await database('customer')
-        .select(database.raw('COUNT(DISTINCT customer.id) AS total'))
-        .where({ company_token })
+        .select(database.raw('COUNT(customer.id) AS total'))
+        .whereRaw(`to_tsvector('simple', customer.company_token) @@ to_tsquery('simple', ?)`, [`${company_token.trim()}`])
         .whereRaw('customer.token_search_indexed ilike ?', [`%${search}%`])
         .where((query) => {
           if (templateId && templateId.length) {
             templateId = templateId.trim()
-            query.whereRaw(`customer.business_template_list::text ilike '%${templateId}%'`)
+            query.whereRaw('customer.business_template_list \\? ?', [`${templateId}`])
           }
         })
 
