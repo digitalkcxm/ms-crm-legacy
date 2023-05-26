@@ -504,7 +504,7 @@ check_bs:
 
 deploy_ld:
   stage: prod
-  image: node:10.14.1
+  image: ubuntu
   before_script:
     - apt update > /dev/null 2>&1 
     - apt install dos2unix python3 python3-pip jq git unzip zip curl bash openssl wget rsync -y > /dev/null 2>&1
@@ -558,7 +558,7 @@ deploy_ld:
       fi 
 
   only:
-    - tags
+    - fix_alterando_server_deploy
   when: manual
   allow_failure: false
   tags:
