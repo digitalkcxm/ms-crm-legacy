@@ -254,7 +254,7 @@ create-release:
 
 deploy_prod:
   stage: prod
-  image: node:10.14.1
+  image: ubuntu
   before_script:
     - apt update > /dev/null 2>&1 
     - apt install dos2unix python3 python3-pip jq git unzip zip curl bash openssl wget rsync -y > /dev/null 2>&1
@@ -378,7 +378,7 @@ check_prod:
 
 deploy_bs:
   stage: prod
-  image: node:10.14.1
+  image: ubuntu
   before_script:
     - apt update > /dev/null 2>&1 
     - apt install dos2unix python3 python3-pip jq git unzip zip curl bash openssl wget rsync -y > /dev/null 2>&1
@@ -504,7 +504,7 @@ check_bs:
 
 deploy_ld:
   stage: prod
-  image: node:10.14.1
+  image: ubuntu
   before_script:
     - apt update > /dev/null 2>&1 
     - apt install dos2unix python3 python3-pip jq git unzip zip curl bash openssl wget rsync -y > /dev/null 2>&1
