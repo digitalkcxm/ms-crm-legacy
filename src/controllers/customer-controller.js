@@ -364,6 +364,57 @@ class CustomerController {
     }
   }
 
+  async getPoolById(req, res) {
+    const companyToken = req.headers['token']
+    const customersIds = req.body.customer_ids
+
+    try {
+      const emailPhoneIndexed = {}
+      const customers = await newCustomer.getByListId(customersIds, companyToken)
+      console.log('customers', customers.length)
+      const customerIdList = customers.map((customer) => customer.id)
+      const emails = await newEmail.listAllByCustomers(customerIdList)
+      const phones = await newPhone.listAllByCustomers(customerIdList)
+      for (let i = 0; i < emails.length; i++) {
+        const email = emails[i]
+        let dataIndexed = emailPhoneIndexed[email.id_customer]
+        if (!dataIndexed) {
+          dataIndexed = { emails: [], phones: [] }
+        }
+        dataIndexed.emails.push(email)
+        emailPhoneIndexed[email.id_customer] = dataIndexed
+      }
+      for (let i = 0; i < phones.length; i++) {
+        const phone = phones[i]
+        let dataIndexed = emailPhoneIndexed[phone.id_customer]
+        if (!dataIndexed) {
+          dataIndexed = { emails: [], phones: [] }
+        }
+        dataIndexed.phones.push(phone)
+        emailPhoneIndexed[phone.id_customer] = dataIndexed
+      }
+
+      for (let i = 0; i < customers.length; i++) {
+        const customer = customers[i]
+        const dataIndexed = emailPhoneIndexed[customer.id]
+        if (dataIndexed && dataIndexed.emails) {
+          customer.email = dataIndexed.emails
+        }
+        if (dataIndexed && dataIndexed.phones) {
+          customer.phone = dataIndexed.phones
+        }
+        customers[i] = customer
+      }
+
+      return res.status(200).send(customers)
+    } catch (err) {
+      console.error(err)
+      return res.status(500).send({
+        err: 'Ocorreu erro ao tentar buscar os dados de uma lista de clientes pelo ID.'
+      })
+    }
+  }
+
   async getAllByCompany(req, res) {
     const companyToken = req.headers.token
     const templateId = req.headers.templateid ? req.headers.templateid : ''
@@ -474,7 +525,6 @@ class CustomerController {
       } else {
         await customerService.updateExistCustomerList(customers, null, null, companyToken)
       }
-
 
       return res.sendStatus(204)
     } catch (err) {

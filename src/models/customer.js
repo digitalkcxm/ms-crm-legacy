@@ -136,6 +136,38 @@ class Customer {
     }
   }
 
+  async getByListId(listId = [], company_token) {
+    try {
+      let customers = await database('customer')
+        .select([
+          'id',
+          'cpfcnpj',
+          'name',
+          'person_type',
+          'cpfcnpj_status',
+          'birthdate',
+          'gender',
+          'mother_name',
+          'deceased',
+          'occupation',
+          'income',
+          'credit_risk',
+          'responsible_user_id',
+          'business_list',
+          'business_template_list',
+          'created_at',
+          'updated_at'
+        ])
+        .whereIn('id', listId)
+        .where('company_token', company_token)
+
+      customers = customers.map((c) => formatCustomer(c))
+      return customers
+    } catch (err) {
+      return err
+    }
+  }
+
   async getAllByCompany(company_token, page = -1, limit = 10, templateId = '') {
     try {
       let customers = []
