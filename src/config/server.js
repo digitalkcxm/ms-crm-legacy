@@ -1,3 +1,4 @@
+const tracing = require('./elastic-apm')
 const express = require('express')
 const helmet = require('helmet')
 const cors = require('cors')
@@ -20,13 +21,13 @@ app.use(expressValidator())
 app.use(bodyParser.json({ limit: '5012mb', extended: true }))
 app.use(bodyParser.urlencoded({ extended: true, limit: '5012mb' }))
 
-healthRoute(app)
-customerRoutes(app)
-emailRoutes(app)
-phoneRoutes(app)
-vehicleRoutes(app)
-addressRoutes(app)
-businessPartnerRoutes(app)
+healthRoute(app, tracing)
+customerRoutes(app, tracing)
+emailRoutes(app, tracing)
+phoneRoutes(app, tracing)
+vehicleRoutes(app, tracing)
+addressRoutes(app, tracing)
+businessPartnerRoutes(app, tracing)
 
 global.cache = {
   customerList: {},
