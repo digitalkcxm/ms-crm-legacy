@@ -227,6 +227,22 @@ class Customer {
     }
   }
 
+  async getCustomerByCpfCnpj(cpfcnpj, company_token) {
+    try {
+      const customers = await database('customer')
+        .select(['id', 'cpfcnpj', 'business_list', 'business_template_list'])
+        .where({ cpfcnpj, company_token })
+
+      if (customers.length) {
+        return customers[0]
+      }
+
+      return null
+    } catch (err) {
+      return err
+    }
+  }
+
   async getByCpfCnpj(cpfcnpj, company_token) {
     try {
       const customers = await database('customer')

@@ -7,7 +7,7 @@ const Vehicle = require('../models/vehicle')
 const BusinessPartner = require('../models/business-partner')
 const { sendNotificationStorageCompleted } = require('../services/business-service')
 const { AggregateModeType } = require('../models/aggregate-mode-enum')
-const { sendToQueuePersistCustomer } = require('../helpers/rabbit-helper')
+const { sendToQueuePersistCustomer, sendToQueueUpdateCPC } = require('../helpers/rabbit-helper')
 
 const newCustomer = new Customer()
 const newEmail = new Email()
@@ -215,8 +215,13 @@ async function organizeAdditionalInformationCustomer(
   if (aggregateMode === AggregateModeType.REPLACE) {
     const customerIds = customerIdList.map((c) => c.id)
     await newAddress.deleteByCustomerIdList(customerIds)
+
+    await newEmail.deleteCPCByCustomerIdList(customerIds)
     await newEmail.deleteByCustomerIdList(customerIds)
+
+    await newPhone.deleteCPCByCustomerIdList(customerIds)
     await newPhone.deleteByCustomerIdList(customerIds)
+
     await newVehicle.deleteByCustomerIdList(customerIds)
     await newBusinessPartner.deleteByCustomerIdList(customerIds)
   }
@@ -288,8 +293,38 @@ async function updateExistCustomerList(
   customerIdList = await newCustomer.updateBatch(customerList)
 
   await organizeAdditionalInformationCustomer(customers, customerIdList, companyToken, aggregateMode)
+  processCPC(customers, companyToken, businessId, businessTemplateId)
 
   return customerIdList
+}
+
+async function processCPC(customers = [], companyToken = '', businessId = '', businessTemplateId = '') {
+  for (const c of customers) {
+    for (const p of c.phone) {
+      const phoneCPC = await newPhone.getLastCPC(c.customer.id, p.number)
+      if (phoneCPC) {
+        phoneCPC.companyToken = companyToken
+        phoneCPC.contact = p.number
+        phoneCPC.contact_type = 'phone_number'
+        phoneCPC.businessId = businessId[0]
+        phoneCPC.businessTemplateId = businessTemplateId[0]
+        phoneCPC.registerId = c._id_register
+        await sendToQueueUpdateCPC(phoneCPC)
+      }
+    }
+    for (const e of c.email) {
+      const emailCPC = await newEmail.getLastCPC(c.customer.id, e.email)
+      if (emailCPC) {
+        emailCPC.companyToken = companyToken
+        emailCPC.contact = e.email
+        emailCPC.contact_type = 'email'
+        emailCPC.businessId = businessId[0]
+        emailCPC.businessTemplateId = businessTemplateId[0]
+        emailCPC.registerId = c._id_register
+        await sendToQueueUpdateCPC(emailCPC)
+      }
+    }
+  }
 }
 
 async function schedulePersist(
@@ -303,6 +338,7 @@ async function schedulePersist(
 ) {
   let customers = []
   dataCustomers.forEach((data) => {
+    console.log(data)
     let customer = builderCustomer.buildCustomer(data, companyToken)
     customers.push(customer)
   })

@@ -5,7 +5,8 @@ function buildCustomer(data, companyToken) {
     email: [],
     phone: [],
     vehicle: [],
-    business_partner: []
+    business_partner: [],
+    _id_register: ''
   }
   dataCustomer.customer = {
     company_token: companyToken
@@ -14,6 +15,7 @@ function buildCustomer(data, companyToken) {
   if (Array.isArray(data) && data.length > 1) {
     data = data[0]
   }
+  dataCustomer._id_register = data._id
 
   if (data.customer_name) dataCustomer.customer.name = data.customer_name
   if (data.customer_cpfcnpj) dataCustomer.customer.cpfcnpj = data.customer_cpfcnpj
