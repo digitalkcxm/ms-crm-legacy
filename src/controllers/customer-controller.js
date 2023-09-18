@@ -531,6 +531,46 @@ class CustomerController {
       return res.status(500).send({ err: err.message })
     }
   }
+
+  async updateCPC(req, res) {
+    const companyToken = req.headers['token']
+
+    const cpfcnpj = req.body.cpfcnpj
+    const contact = req.body.contact
+    const contactType = req.body.contact_type
+    const userId = req.body.user_id
+    const username = req.body.username
+    const updatedAt = req.body.updated_at
+    const cpc = req.body.cpc
+
+    try {
+      const customer = await newCustomer.getCustomerByCpfCnpj(cpfcnpj, companyToken)
+      if (!customer) return res.status(400).send({ err: 'Customer não encontrado.' })
+
+      if (contactType === 'phone_number') {
+        const phone = await newPhone.getByNumber(customer.id, contact)
+        if (!phone) {
+          return res.status(400).send({ err: 'o telefone não foi encontrado para o customer' })
+        }
+        await newPhone.insertCPC(customer.id, phone.id, cpc, userId, username, updatedAt)
+      } else if (contactType === 'email') {
+        const email = await newEmail.getByEmail(customer.id, contact)
+        if (!email) {
+          return res.status(400).send({ err: 'o email não foi encontrado para o customer' })
+        }
+        await newEmail.insertCPC(customer.id, email.id, cpc, userId, username, updatedAt)
+      } else if (contactType === 'address') {
+        // TODO: falta implementar
+      } else {
+        return res.status(400).send({ err: 'o contact_type não é permitido' })
+      }
+
+      return res.sendStatus(204)
+    } catch (err) {
+      console.error(err)
+      return res.status(500).send({ err: err.message })
+    }
+  }
 }
 
 module.exports = CustomerController
