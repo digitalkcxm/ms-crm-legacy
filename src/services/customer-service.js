@@ -273,6 +273,7 @@ async function persistNewCustomerList(customers = [], businessId = [], businessT
   })
 
   await organizeAdditionalInformationCustomer(customers, customerIdList, companyToken)
+  processCPC(customers, companyToken, businessId, businessTemplateId)
 
   return customerIdList
 }
