@@ -1,17 +1,16 @@
 module.exports = {
-
   development: {
     client: 'postgresql',
     connection: {
-      host:     process.env.DB_HOST,
+      host: process.env.DB_HOST,
       database: process.env.DB_DATABASE,
-      user:     process.env.DB_USERNAME,
+      user: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       connectTimeout: 90000
     },
     pool: {
       min: 1,
-      max: 20,
+      max: 20
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -24,15 +23,15 @@ module.exports = {
   testing: {
     client: 'postgresql',
     connection: {
-      host:     process.env.DB_HOST_TEST,
+      host: process.env.DB_HOST_TEST,
       database: process.env.DB_DATABASE_TEST,
-      user:     process.env.DB_USERNAME_TEST,
+      user: process.env.DB_USERNAME_TEST,
       password: process.env.DB_PASSWORD_TEST,
       connectTimeout: 90000
     },
     pool: {
       min: 1,
-      max: 20,
+      max: 20
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -45,15 +44,15 @@ module.exports = {
   staging: {
     client: 'postgresql',
     connection: {
-      host:     process.env.DB_HOST,
+      host: process.env.DB_HOST,
       database: process.env.DB_DATABASE,
-      user:     process.env.DB_USERNAME,
+      user: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       connectTimeout: 90000
     },
     pool: {
       min: 1,
-      max: 20,
+      max: 20
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -66,15 +65,36 @@ module.exports = {
   production: {
     client: 'postgresql',
     connection: {
-      host:     process.env.DB_HOST,
+      host: process.env.DB_HOST,
       database: process.env.DB_DATABASE,
-      user:     process.env.DB_USERNAME,
+      user: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       connectTimeout: 90000
     },
     pool: {
       min: 1,
-      max: 20,
+      max: 20
+    },
+    migrations: {
+      directory: __dirname + '/src/config/database/migrations'
+    },
+    seeds: {
+      directory: __dirname + '/src/config/database/seeds'
+    }
+  },
+
+  production_read: {
+    client: 'postgresql',
+    connection: {
+      host: process.env.DB_READ_HOST,
+      database: process.env.DB_DATABASE,
+      user: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      connectTimeout: 90000
+    },
+    pool: {
+      min: 1,
+      max: 20
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -83,5 +103,4 @@ module.exports = {
       directory: __dirname + '/src/config/database/seeds'
     }
   }
-
-};
+}

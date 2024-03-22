@@ -1,4 +1,5 @@
 const database = require('../config/database/database')
+const databaseRead = require('../config/database/database-read')
 
 const { formatCustomer } = require('../helpers/format-data-customer')
 
@@ -326,7 +327,7 @@ class Customer {
   async searchCustomerByNameCpfEmailPhone(search, company_token, templateId = '') {
     try {
       console.time('searchCustomer')
-      const customers = await database('customer')
+      const customers = await databaseRead('customer')
         .select(
           database.raw(
             'customer.id, customer.name as customer_name, customer.cpfcnpj as customer_cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
@@ -351,7 +352,7 @@ class Customer {
 
   async searchCustomerFormattedByNameCpfEmailPhone(search, company_token, templateId = '', page = 0, limit = 10) {
     try {
-      const customers = await database('customer')
+      const customers = await databaseRead('customer')
         .select(
           database.raw(
             'customer.id, customer.name, customer.cpfcnpj, customer.business_list, customer.business_template_list, customer.responsible_user_id'
@@ -368,7 +369,7 @@ class Customer {
         .offset(page * limit)
         .limit(limit)
 
-      const customersCount = await database('customer')
+      const customersCount = await databaseRead('customer')
         .select(database.raw('COUNT(customer.id) AS total'))
         .whereRaw(`to_tsvector('simple', customer.company_token) @@ to_tsquery('simple', ?)`, [`${company_token.trim()}`])
         .whereRaw('customer.token_search_indexed ilike ?', [`%${search}%`])
@@ -417,7 +418,7 @@ class Customer {
 
         if (numSearchValue === maxSearchValue || indexSearchValue == lastIndexSearchValueList) {
           console.log(firstSearchKeyField)
-          const customerResultList = await database('customer')
+          const customerResultList = await databaseRead('customer')
             .select(
               database.raw(
                 'customer.id, cpfcnpj, name, person_type cpfcnpj_status, birthdate, gender, mother_name, deceased, occupation, income, credit_risk, customer.created_at, customer.updated_at, business_list, business_template_list, responsible_user_id'
