@@ -10,7 +10,7 @@ module.exports = {
     },
     pool: {
       min: 1,
-      max: 20
+      max: 5
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -31,7 +31,7 @@ module.exports = {
     },
     pool: {
       min: 1,
-      max: 20
+      max: 5
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -52,7 +52,7 @@ module.exports = {
     },
     pool: {
       min: 1,
-      max: 20
+      max: 5
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -73,7 +73,7 @@ module.exports = {
     },
     pool: {
       min: 1,
-      max: 20
+      max: 5
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
@@ -94,7 +94,7 @@ module.exports = {
     },
     pool: {
       min: 1,
-      max: 20
+      max: 5
     },
     migrations: {
       directory: __dirname + '/src/config/database/migrations'
