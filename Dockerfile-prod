@@ -10,7 +10,7 @@ COPY .env .env
 
 COPY . .
 
-RUN npm run migrate:latest
+# RUN npm run migrate:latest
 
 EXPOSE 80
 
