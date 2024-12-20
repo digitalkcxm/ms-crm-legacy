@@ -16,4 +16,4 @@ EXPOSE 80
 
 # CMD ["npm", "run", "start:prod"]
 
-CMD ["sh", "-c", "npm run migrate && npm start:prod"]
+CMD ["sh", "-c", "npm run migrate:latest && npm start:prod"]
