@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 80
 
-CMD ["sh", "-c", "npm run migrate:latest && npm start:prod"]
+CMD ["sh", "-c", "npm run migrate:latest && npm run start:prod"]
