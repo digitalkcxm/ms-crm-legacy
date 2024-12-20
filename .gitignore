@@ -5,7 +5,6 @@ node_modules
 .env.homol
 .env.ld
 .env.bs
-package-*
 
 npm-*
 
