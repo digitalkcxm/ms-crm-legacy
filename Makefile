@@ -5,7 +5,7 @@ stop-services:
 build:
 	- docker build -f ./Dockerfile-prod -t ms-crm-legacy-container:latest .
 start:
-	- docker run --name ms-crm-legacy-container -d ms-crm-legacy-container:latest
+	- docker run --name ms-crm-legacy-container -p 5009:80 -d ms-crm-legacy-container:latest
 exec:
 	- docker exec -it ms-crm-legacy-container /bin/sh
 logs:

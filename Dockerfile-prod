@@ -6,12 +6,10 @@ COPY package*.json ./
 
 RUN npm ci
 
-COPY .env .env
-
 COPY . .
-
-# RUN npm run migrate:latest
 
 EXPOSE 80
 
-CMD ["sh", "-c", "npm run migrate:latest && npm run start:prod"]
+RUN chmod +x scripts/entrypoint.sh
+
+ENTRYPOINT ["/usr/src/app/scripts/entrypoint.sh"]
